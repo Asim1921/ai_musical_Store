@@ -1,424 +1,221 @@
+// src/components/Dashboard.js - Clean and organized
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import PostCard from './PostCard';
+import SearchModal from './Search';
+import CreatePostModal from './CreatePostModal';
 
-// API configuration - Updated to work with real backend
-const API_BASE = 'http://localhost:8000/api/ai-pipeline';
+// API configuration
+const API_BASE = 'http://localhost:8000/api/social';
 
 const api = {
-  getRawContents: async () => {
+  getFeed: async () => {
     try {
-      const response = await fetch(`${API_BASE}/raw-contents/`);
-      if (response.ok) {
-        return await response.json();
-      }
-      throw new Error(`HTTP ${response.status}`);
-    } catch (error) {
-      console.error('Error fetching raw contents:', error);
-      toast.error('Failed to load content. Please check if Django server is running.');
-      return [];
-    }
-  },
-  
-  getDashboardStats: async () => {
-    try {
-      const response = await fetch(`${API_BASE}/pipeline-control/dashboard_stats/`);
-      if (response.ok) {
-        return await response.json();
-      }
-      throw new Error(`HTTP ${response.status}`);
-    } catch (error) {
-      console.error('Error fetching dashboard stats:', error);
-      toast.error('Failed to load dashboard stats.');
-      return {
-        contents: { total: 0, completed: 0, processing: 0, pending: 0 },
-        jobs: { total: 0, active: 0, completed: 0, failed: 0 },
-        sources: { total: 0, active: 0, paused: 0 }
-      };
-    }
-  },
-  
-  triggerPipeline: async () => {
-    try {
-      const response = await fetch(`${API_BASE}/pipeline-control/run_pipeline/`, {
-        method: 'POST',
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`${API_BASE}/feed/`, {
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         }
       });
-      const data = await response.json();
-      
       if (response.ok) {
-        return data;
-      } else {
-        throw new Error(data.error || 'Pipeline trigger failed');
+        return await response.json();
       }
+      throw new Error(`HTTP ${response.status}`);
     } catch (error) {
-      console.error('Error triggering pipeline:', error);
+      console.error('Error fetching feed:', error);
+      return [];
+    }
+  },
+
+  getUserProfile: async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`${API_BASE}/profile/`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
+      if (response.ok) {
+        return await response.json();
+      }
+      throw new Error(`HTTP ${response.status}`);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
       throw error;
     }
   },
-  
-  testReddit: async () => {
+
+  toggleLike: async (postId) => {
     try {
-      const response = await fetch(`${API_BASE}/test-reddit/`);
-      return await response.json();
-    } catch (error) {
-      console.error('Error testing Reddit:', error);
-      return { success: false, error: error.message };
-    }
-  },
-  
-  getContentSources: async () => {
-    try {
-      const response = await fetch(`${API_BASE}/content-sources/`);
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`${API_BASE}/posts/${postId}/like/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
       if (response.ok) {
         return await response.json();
       }
       throw new Error(`HTTP ${response.status}`);
     } catch (error) {
-      console.error('Error fetching content sources:', error);
-      return [];
+      console.error('Error toggling like:', error);
+      throw error;
     }
   },
-  
-  getProcessingJobs: async () => {
+
+  toggleFollow: async (userId) => {
     try {
-      const response = await fetch(`${API_BASE}/processing-jobs/`);
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`${API_BASE}/users/${userId}/follow/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
       if (response.ok) {
         return await response.json();
       }
       throw new Error(`HTTP ${response.status}`);
     } catch (error) {
-      console.error('Error fetching processing jobs:', error);
-      return [];
+      console.error('Error toggling follow:', error);
+      throw error;
     }
   }
 };
 
-const AudioPlayer = ({ content }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
-    if (!isPlaying) {
-      const interval = setInterval(() => {
-        setCurrentTime(prev => {
-          if (prev >= duration) {
-            setIsPlaying(false);
-            clearInterval(interval);
-            return 0;
-          }
-          return prev + 1;
-        });
-      }, 1000);
-    }
-  };
-
-  useEffect(() => {
-    const estimatedDuration = Math.max(60, Math.floor(content.content.length / 10));
-    setDuration(estimatedDuration);
-  }, [content]);
-
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
-
-  return (
-    <div className="audio-player">
-      <button 
-        className="play-button"
-        onClick={togglePlay}
-      >
-        {isPlaying ? '⏸️' : '▶️'}
-      </button>
-      <div className="audio-info">
-        <div className="audio-title">{content.title}</div>
-        <div className="audio-progress">
-          <div className="progress-bar">
-            <div 
-              className="progress-fill" 
-              style={{ width: `${progressPercentage}%` }}
-            ></div>
-          </div>
-          <span className="audio-time">
-            {formatTime(currentTime)} / {formatTime(duration)}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const ContentPost = ({ content, index }) => {
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'published': return '#22c55e';
-      case 'processed': return '#f59e0b';
-      case 'processing': return '#3b82f6';
-      case 'pending': return '#6b7280';
-      case 'failed': return '#ef4444';
-      default: return '#6b7280';
-    }
-  };
-
-  const getStatusText = (status) => {
-    switch (status) {
-      case 'published': return 'AI Generated ✓';
-      case 'processed': return 'Processed ✓';
-      case 'processing': return 'Processing...';
-      case 'pending': return 'Pending';
-      case 'failed': return 'Failed ❌';
-      default: return 'Unknown';
-    }
-  };
-
-  const formatTimeAgo = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
-    
-    if (diffInHours < 1) return 'Just now';
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    return `${Math.floor(diffInHours / 24)}d ago`;
-  };
-
-  const getDisplayContent = () => {
-    return content.processed_content || content.content;
-  };
-
-  return (
-    <div className="content-post">
-      <div className="post-header">
-        <img
-          src={`https://ui-avatars.com/api/?name=${content.author}&background=${getStatusColor(content.processing_status).slice(1)}&color=fff&size=40`}
-          alt="User"
-          className="post-avatar"
-        />
-        <div className="post-info">
-          <h4 className="post-author">u/{content.author}</h4>
-          <p className="post-time">
-            {formatTimeAgo(content.created_at)} • {getStatusText(content.processing_status)}
-            {content.subreddit && ` • r/${content.subreddit}`}
-          </p>
-        </div>
-        <div className="post-metrics">
-          <span className="metric-item">⬆️ {content.score || 0}</span>
-          <span className="metric-item">💬 {content.num_comments || 0}</span>
-          {content.word_count && (
-            <span className="metric-item">📝 {content.word_count} words</span>
-          )}
-        </div>
-      </div>
-      
-      <h3 className="post-title">{content.title}</h3>
-      <p className="post-description">
-        {getDisplayContent()}
-      </p>
-      
-      {(content.quality_score > 0 || content.engagement_score > 0) && (
-        <div className="ai-scores">
-          {content.quality_score > 0 && (
-            <div className="score-badge">
-              🎯 Quality: {Math.round(content.quality_score * 100)}%
-            </div>
-          )}
-          {content.engagement_score > 0 && (
-            <div className="score-badge">
-              📈 Engagement: {Math.round(content.engagement_score * 100)}%
-            </div>
-          )}
-        </div>
-      )}
-      
-      {content.processing_status === 'published' && content.audio_file && (
-        <AudioPlayer content={content} />
-      )}
-      
-      {content.processing_status === 'processing' && (
-        <div className="processing-indicator">
-          <div className="processing-spinner"></div>
-          <span>AI is processing this content...</span>
-        </div>
-      )}
-      
-      {content.processing_status === 'failed' && (
-        <div className="failed-indicator">
-          <span>❌ Processing failed - will retry automatically</span>
-        </div>
-      )}
-      
-      <div className="post-actions-bar">
-        <button className="action-btn-small like">❤️ {Math.floor((content.score || 0) * 0.1)}</button>
-        <button className="action-btn-small comment">💬 {Math.floor((content.num_comments || 0) * 0.3)}</button>
-        <button className="action-btn-small share">📤 Share</button>
-        <button className="action-btn-small save">🔖</button>
-        {content.source_url && (
-          <a 
-            href={content.source_url} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="action-btn-small source"
-          >
-            🔗 Reddit
-          </a>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const AIGenerationCard = ({ onGenerateContent, isGenerating, stats }) => {
-  return (
-    <div className="ai-card">
-      <div className="ai-header">
-        <div className="ai-icon">🤖</div>
-        <div className="ai-info">
-          <h3 className="ai-title">AI Content Generator</h3>
-          <p className="ai-subtitle">Create amazing audio content from Reddit posts</p>
-        </div>
-      </div>
-      
-      <div className="ai-stats">
-        <div className="ai-stat">
-          <div className="stat-number">{stats?.contents?.total || 0}</div>
-          <div className="stat-label">Total Contents</div>
-        </div>
-        <div className="ai-stat">
-          <div className="stat-number">{stats?.contents?.completed || 0}</div>
-          <div className="stat-label">Completed</div>
-        </div>
-        <div className="ai-stat">
-          <div className="stat-number">{stats?.jobs?.active || 0}</div>
-          <div className="stat-label">Processing</div>
-        </div>
-      </div>
-      
-      <div className="ai-features">
-        <div className="feature-item">
-          <div className="feature-title">Reddit Stories</div>
-          <div className="feature-desc">Auto-fetch from r/AskReddit</div>
-        </div>
-        <div className="feature-item">
-          <div className="feature-title">AI Rewriting</div>
-          <div className="feature-desc">Enhanced with Mixtral AI</div>
-        </div>
-        <div className="feature-item">
-          <div className="feature-title">Voice Synthesis</div>
-          <div className="feature-desc">Natural speech with ElevenLabs</div>
-        </div>
-      </div>
-      
-      <button 
-        className={`ai-generate-btn ${isGenerating ? 'generating' : ''}`}
-        onClick={onGenerateContent}
-        disabled={isGenerating}
-      >
-        {isGenerating ? (
-          <>
-            <span className="btn-spinner"></span>
-            Generating Content...
-          </>
-        ) : (
-          'Start AI Generation'
-        )}
-      </button>
-    </div>
-  );
-};
-
 const Dashboard = ({ setIsAuthenticated }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [activeTab, setActiveTab] = useState('home');
-  const [rawContents, setRawContents] = useState([]);
-  const [dashboardStats, setDashboardStats] = useState(null);
+  const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [showCreatePost, setShowCreatePost] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
 
   useEffect(() => {
-    const userData = localStorage.getItem('user_data');
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
-    
-    loadDashboardData();
-    
-    const interval = setInterval(loadDashboardData, 30000);
-    return () => clearInterval(interval);
+    initializeDashboard();
   }, []);
 
-  const loadDashboardData = async () => {
+  const initializeDashboard = async () => {
     try {
-      const [contents, stats] = await Promise.all([
-        api.getRawContents(),
-        api.getDashboardStats()
-      ]);
+      // Load current user profile to get updated stats
+      const updatedProfile = await api.getUserProfile();
+      setUser(updatedProfile);
+      localStorage.setItem('user_data', JSON.stringify(updatedProfile));
       
-      const sortedContents = contents.sort((a, b) => 
-        new Date(b.created_at) - new Date(a.created_at)
-      );
-      
-      setRawContents(sortedContents);
-      setDashboardStats(stats);
+      // Load feed
+      const feedData = await api.getFeed();
+      setPosts(feedData);
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
-      toast.error('Failed to load content');
+      console.error('Error initializing dashboard:', error);
+      toast.error('Failed to load dashboard');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGenerateContent = async () => {
+  const handleLike = async (postId) => {
     try {
-      setIsGenerating(true);
-      toast.loading('Starting Reddit content fetch...');
+      const result = await api.toggleLike(postId);
       
-      const result = await api.triggerPipeline();
-      toast.dismiss();
-      
-      if (result.success) {
-        toast.success(result.message || 'Content generation started successfully!');
-        console.log('Pipeline results:', result);
-        
-        if (result.results && result.results.length > 0) {
-          const successfulSources = result.results.filter(r => r.success);
-          const failedSources = result.results.filter(r => !r.success);
-          
-          if (successfulSources.length > 0) {
-            setTimeout(() => {
-              toast.success(`✅ Fetched content from ${successfulSources.length} sources`);
-            }, 1000);
-          }
-          
-          if (failedSources.length > 0) {
-            setTimeout(() => {
-              toast.error(`❌ ${failedSources.length} sources failed`);
-            }, 1500);
-          }
-        }
-        
-        setTimeout(loadDashboardData, 3000);
-      } else {
-        throw new Error(result.error || 'Pipeline execution failed');
-      }
-      
+      setPosts(prevPosts => 
+        prevPosts.map(post => 
+          post.id === postId 
+            ? { 
+                ...post, 
+                is_liked: result.action === 'liked',
+                likes_count: result.likes_count 
+              }
+            : post
+        )
+      );
     } catch (error) {
-      console.error('Error triggering pipeline:', error);
-      toast.dismiss();
-      
-      if (error.message.includes('No active Reddit sources')) {
-        toast.error('No Reddit sources configured! Please set up a Reddit source first.');
-      } else {
-        toast.error(`Failed to start content generation: ${error.message}`);
-      }
-    } finally {
-      setIsGenerating(false);
+      toast.error('Failed to like post');
     }
+  };
+
+  const handleFollow = async (userId) => {
+    try {
+      const result = await api.toggleFollow(userId);
+      
+      // Update posts feed
+      setPosts(prevPosts => 
+        prevPosts.map(post => 
+          post.author.id === userId
+            ? { 
+                ...post, 
+                author: {
+                  ...post.author,
+                  is_following: result.action === 'followed',
+                  followers_count: result.followers_count
+                }
+              }
+            : post
+        )
+      );
+
+      // Update current user's following count
+      setUser(prevUser => ({
+        ...prevUser,
+        following_count: result.action === 'followed' 
+          ? prevUser.following_count + 1 
+          : prevUser.following_count - 1
+      }));
+      
+      toast.success(`User ${result.action} successfully!`);
+    } catch (error) {
+      toast.error('Failed to follow/unfollow user');
+    }
+  };
+
+  const handleFollowUpdate = (userId, result) => {
+    // Update user's following count when following from search
+    setUser(prevUser => ({
+      ...prevUser,
+      following_count: result.action === 'followed' 
+        ? prevUser.following_count + 1 
+        : prevUser.following_count - 1
+    }));
+
+    // Also update in posts if the user appears in feed
+    setPosts(prevPosts => 
+      prevPosts.map(post => 
+        post.author.id === userId
+          ? { 
+              ...post, 
+              author: {
+                ...post.author,
+                is_following: result.action === 'followed',
+                followers_count: result.followers_count
+              }
+            }
+          : post
+      )
+    );
+  };
+
+  const handlePostCreated = (newPost) => {
+    setPosts(prevPosts => [newPost, ...prevPosts]);
+    // Update user's post count
+    setUser(prevUser => ({
+      ...prevUser,
+      posts_count: prevUser.posts_count + 1
+    }));
+  };
+
+  const handleCommentAdded = (postId) => {
+    setPosts(prevPosts => 
+      prevPosts.map(post => 
+        post.id === postId 
+          ? { ...post, comments_count: post.comments_count + 1 }
+          : post
+      )
+    );
   };
 
   const handleLogout = () => {
@@ -431,14 +228,28 @@ const Dashboard = ({ setIsAuthenticated }) => {
 
   if (!user) {
     return (
-      <div className="dashboard-loading">
-        <div className="loading-spinner"></div>
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#f8fafc'
+      }}>
+        <div style={{
+          width: '40px',
+          height: '40px',
+          border: '4px solid #e2e8f0',
+          borderTop: '4px solid #3b82f6',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite'
+        }}></div>
       </div>
     );
   }
 
   return (
     <div className="modern-dashboard">
+      {/* Top Navigation */}
       <nav className="top-nav">
         <div className="nav-container">
           <div className="nav-content">
@@ -449,8 +260,10 @@ const Dashboard = ({ setIsAuthenticated }) => {
               <div className="search-input-wrapper">
                 <input
                   type="text"
-                  placeholder="Search AI-generated content..."
+                  placeholder="Search posts, people..."
                   className="search-input"
+                  onClick={() => setShowSearch(true)}
+                  readOnly
                 />
                 <div className="search-icon">🔍</div>
               </div>
@@ -459,9 +272,11 @@ const Dashboard = ({ setIsAuthenticated }) => {
               <button className="notification-btn">🔔</button>
               <div className="user-profile">
                 <img
-                  src={user.avatar || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=6366f1&color=fff&size=40`}
+                  src={user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=6366f1&color=fff&size=40`}
                   alt="Profile"
                   className="profile-image"
+                  onClick={() => navigate('/profile')}
+                  style={{ cursor: 'pointer' }}
                 />
                 <button onClick={handleLogout} className="logout-btn">
                   Logout
@@ -475,50 +290,58 @@ const Dashboard = ({ setIsAuthenticated }) => {
       <div className="main-container">
         <div className="dashboard-grid">
           
+          {/* Left Sidebar */}
           <div className="left-sidebar">
             <div className="profile-card">
               <div className="profile-header">
                 <div className="profile-info">
                   <img
-                    src={user.avatar || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=fff&color=6366f1&size=60`}
+                    src={user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=fff&color=6366f1&size=60`}
                     alt="Profile"
                     className="profile-avatar"
+                    onClick={() => navigate('/profile')}
+                    style={{ cursor: 'pointer' }}
                   />
                   <div className="profile-details">
                     <h3 className="profile-name">{user.first_name} {user.last_name}</h3>
-                    <p className="profile-role">{user.role}</p>
+                    <p className="profile-role">@{user.username}</p>
                   </div>
                 </div>
                 
                 <div className="profile-stats">
                   <div className="stat-item">
-                    <div className="stat-number">{dashboardStats?.contents?.total || 0}</div>
-                    <div className="stat-label">AI Contents</div>
+                    <div className="stat-number">{user.posts_count || 0}</div>
+                    <div className="stat-label">Posts</div>
                   </div>
                   <div className="stat-item">
-                    <div className="stat-number">{dashboardStats?.contents?.completed || 0}</div>
-                    <div className="stat-label">Completed</div>
+                    <div className="stat-number">{user.followers_count || 0}</div>
+                    <div className="stat-label">Followers</div>
                   </div>
                   <div className="stat-item">
-                    <div className="stat-number">{dashboardStats?.jobs?.active || 0}</div>
-                    <div className="stat-label">Processing</div>
+                    <div className="stat-number">{user.following_count || 0}</div>
+                    <div className="stat-label">Following</div>
                   </div>
                 </div>
               </div>
 
               <div className="nav-menu">
                 {[
-                  { id: 'home', icon: '🏠', label: 'Home' },
-                  { id: 'ai-content', icon: '🤖', label: 'AI Content' },
-                  { id: 'library', icon: '📚', label: 'My Library' },
-                  { id: 'uploads', icon: '📤', label: 'My Uploads' },
-                  { id: 'analytics', icon: '📊', label: 'Analytics' },
+                  { id: 'feed', icon: '🏠', label: 'Feed' },
+                  { id: 'profile', icon: '👤', label: 'My Profile' },
+                  { id: 'messages', icon: '💬', label: 'Messages' },
+                  { id: 'notifications', icon: '🔔', label: 'Notifications' },
                   { id: 'settings', icon: '⚙️', label: 'Settings' },
                 ].map((item) => (
                   <button
                     key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
+                    onClick={() => {
+                      if (item.id === 'profile') {
+                        navigate('/profile');
+                      } else {
+                        // Handle other navigation here
+                      }
+                    }}
+                    className="nav-item"
                   >
                     <span className="nav-icon">{item.icon}</span>
                     <span className="nav-label">{item.label}</span>
@@ -526,95 +349,183 @@ const Dashboard = ({ setIsAuthenticated }) => {
                 ))}
               </div>
             </div>
+          </div>
 
-            <div className="stats-card">
-              <h4 className="stats-title">AI Pipeline Stats</h4>
-              <div className="stats-list">
-                <div className="stats-row">
-                  <span className="stats-label">Total Jobs</span>
-                  <span className="stats-value">{dashboardStats?.jobs?.total || 0}</span>
-                </div>
-                <div className="stats-row">
-                  <span className="stats-label">Success Rate</span>
-                  <span className="stats-value positive">
-                    {dashboardStats?.jobs?.total > 0 
-                      ? Math.round((dashboardStats.jobs.completed / dashboardStats.jobs.total) * 100)
-                      : 0}%
-                  </span>
-                </div>
-                <div className="stats-row">
-                  <span className="stats-label">Active Sources</span>
-                  <span className="stats-value">{dashboardStats?.sources?.active || 0}</span>
+          {/* Main Content */}
+          <div className="main-content">
+            
+            <div className="create-post-card">
+              <div className="post-input-area">
+                <img
+                  src={user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=6366f1&color=fff&size=40`}
+                  alt="User"
+                  className="post-avatar"
+                />
+                <button
+                  onClick={() => setShowCreatePost(true)}
+                  className="post-input"
+                  style={{ cursor: 'pointer' }}
+                >
+                  What's on your mind?
+                </button>
+              </div>
+              
+              <div className="post-actions">
+                <div className="action-buttons">
+                  <button 
+                    className="action-btn"
+                    onClick={() => setShowCreatePost(true)}
+                  >
+                    <span className="action-icon">📝</span>
+                    <span className="action-label">Text</span>
+                  </button>
+                  <button 
+                    className="action-btn upload"
+                    onClick={() => setShowCreatePost(true)}
+                  >
+                    <span className="action-icon">📷</span>
+                    <span className="action-label">Photo</span>
+                  </button>
+                  <button 
+                    className="action-btn ai"
+                    onClick={() => setShowCreatePost(true)}
+                  >
+                    <span className="action-icon">🔗</span>
+                    <span className="action-label">Link</span>
+                  </button>
                 </div>
               </div>
             </div>
-          </div>
-
-          <div className="main-content">
-            
-            <AIGenerationCard 
-              onGenerateContent={handleGenerateContent}
-              isGenerating={isGenerating}
-              stats={dashboardStats}
-            />
 
             <div className="content-feed">
               {loading ? (
                 <div className="loading-content">
                   <div className="loading-spinner"></div>
-                  <span>Loading AI-generated content...</span>
+                  <span>Loading your feed...</span>
                 </div>
-              ) : rawContents.length === 0 ? (
+              ) : posts.length === 0 ? (
                 <div className="empty-content">
-                  <div className="empty-icon">🤖</div>
-                  <h3>No AI content yet</h3>
-                  <p>Click "Start AI Generation" to create your first AI-generated audio content from Reddit posts!</p>
+                  <div className="empty-icon">📝</div>
+                  <h3>Your feed is empty</h3>
+                  <p>Follow some people or create your first post to get started!</p>
+                  <button
+                    onClick={() => setShowCreatePost(true)}
+                    style={{
+                      padding: '12px 24px',
+                      background: '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      marginTop: '16px'
+                    }}
+                  >
+                    Create Your First Post
+                  </button>
                 </div>
               ) : (
-                rawContents.map((content, index) => (
-                  <ContentPost 
-                    key={content.id} 
-                    content={content} 
-                    index={index} 
+                posts.map((post) => (
+                  <PostCard 
+                    key={post.id} 
+                    post={post} 
+                    onLike={handleLike}
+                    onFollow={handleFollow}
+                    onCommentAdded={handleCommentAdded}
                   />
                 ))
               )}
             </div>
           </div>
 
+          {/* Right Sidebar */}
           <div className="right-sidebar">
             <div className="trending-card">
-              <h4 className="trending-title">🔥 Recent AI Activity</h4>
+              <h4 className="trending-title">🔥 Trending</h4>
               <div className="trending-list">
-                {rawContents.slice(0, 5).map((content, index) => (
-                  <div key={content.id} className="trending-item">
-                    <span className="trending-topic">{content.title.substring(0, 30)}...</span>
-                    <span className="trending-count">
-                      {content.processing_status === 'completed' ? '✓' : '⏳'}
-                    </span>
-                  </div>
-                ))}
+                <div className="trending-item">
+                  <span className="trending-topic">#Technology</span>
+                  <span className="trending-count">1.2k posts</span>
+                </div>
+                <div className="trending-item">
+                  <span className="trending-topic">#Photography</span>
+                  <span className="trending-count">856 posts</span>
+                </div>
+                <div className="trending-item">
+                  <span className="trending-topic">#Music</span>
+                  <span className="trending-count">642 posts</span>
+                </div>
+                <div className="trending-item">
+                  <span className="trending-topic">#Travel</span>
+                  <span className="trending-count">523 posts</span>
+                </div>
+                <div className="trending-item">
+                  <span className="trending-topic">#Food</span>
+                  <span className="trending-count">417 posts</span>
+                </div>
               </div>
             </div>
 
             <div className="creators-card">
-              <h4 className="creators-title">📊 Content Sources</h4>
+              <h4 className="creators-title">💡 Suggested for You</h4>
               <div className="creators-list">
                 <div className="creator-item">
-                  <div className="creator-avatar" style={{background: '#ff4500'}}>
-                    📰
+                  <div className="creator-avatar" style={{background: '#3b82f6', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px'}}>
+                    👨‍💻
                   </div>
                   <div className="creator-info">
-                    <div className="creator-name">r/AskReddit</div>
-                    <div className="creator-meta">Reddit Stories • {rawContents.length} posts</div>
+                    <div className="creator-name">Tech Enthusiast</div>
+                    <div className="creator-meta">128 followers • 45 posts</div>
                   </div>
-                  <div className="status-indicator active">Active</div>
+                  <button className="follow-btn">Follow</button>
+                </div>
+                
+                <div className="creator-item">
+                  <div className="creator-avatar" style={{background: '#10b981', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px'}}>
+                    📸
+                  </div>
+                  <div className="creator-info">
+                    <div className="creator-name">Photo Stories</div>
+                    <div className="creator-meta">89 followers • 32 posts</div>
+                  </div>
+                  <button className="follow-btn">Follow</button>
+                </div>
+                
+                <div className="creator-item">
+                  <div className="creator-avatar" style={{background: '#f59e0b', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px'}}>
+                    🎵
+                  </div>
+                  <div className="creator-info">
+                    <div className="creator-name">Music Lover</div>
+                    <div className="creator-meta">156 followers • 67 posts</div>
+                  </div>
+                  <button className="follow-btn">Follow</button>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      <CreatePostModal 
+        isOpen={showCreatePost}
+        onClose={() => setShowCreatePost(false)}
+        onPostCreated={handlePostCreated}
+      />
+      
+      <SearchModal 
+        isOpen={showSearch}
+        onClose={() => setShowSearch(false)}
+        onFollowUpdate={handleFollowUpdate}
+      />
+      
+      {/* Add CSS for spinner animation */}
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };
