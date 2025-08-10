@@ -1,8 +1,10 @@
-// src/components/ProfilePage.js
+// STEP 3: Updated ProfilePage.js with Chat Integration
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import PostCard from './PostCard';
+import MessageButton from './MessageButton';
+import ChatInterface from './Chat';  // Add this import
 
 const API_BASE = 'http://localhost:8000/api/social';
 
@@ -273,7 +275,7 @@ const EditProfileModal = ({ isOpen, onClose, profile, onProfileUpdated }) => {
 };
 
 const ProfilePage = () => {
-  const { username } = useParams(); // Get username from URL
+  const { username } = useParams();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
@@ -281,6 +283,9 @@ const ProfilePage = () => {
   const [postsLoading, setPostsLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
   const [activeTab, setActiveTab] = useState('posts');
+  
+  // ADD CHAT STATE
+  const [showChat, setShowChat] = useState(false);
 
   const currentUser = JSON.parse(localStorage.getItem('user_data'));
   const isOwnProfile = !username || username === currentUser.username;
@@ -297,7 +302,7 @@ const ProfilePage = () => {
       setProfile(profileData);
     } catch (error) {
       toast.error('Failed to load profile');
-      navigate('/dashboard'); // Redirect to dashboard if profile not found
+      navigate('/dashboard');
     } finally {
       setLoading(false);
     }
@@ -327,14 +332,11 @@ const ProfilePage = () => {
         followers_count: result.followers_count
       }));
 
-      // Update localStorage if viewing own profile after someone follows/unfollows
       const currentUser = JSON.parse(localStorage.getItem('user_data'));
       if (result.action === 'followed') {
-        // Someone followed this user, update their following count if it's the current user
         const updatedUser = { ...currentUser, following_count: currentUser.following_count + 1 };
         localStorage.setItem('user_data', JSON.stringify(updatedUser));
       } else {
-        // Someone unfollowed this user
         const updatedUser = { ...currentUser, following_count: currentUser.following_count - 1 };
         localStorage.setItem('user_data', JSON.stringify(updatedUser));
       }
@@ -380,6 +382,15 @@ const ProfilePage = () => {
           : post
       )
     );
+  };
+
+  // ADD CHAT HANDLERS
+  const handleChatCreated = (chat) => {
+    console.log('Chat created:', chat);
+  };
+
+  const handleOpenChat = () => {
+    setShowChat(true);
   };
 
   if (loading) {
@@ -522,6 +533,7 @@ const ProfilePage = () => {
               )}
             </div>
             
+            {/* UPDATED ACTION BUTTONS SECTION */}
             <div style={{ display: 'flex', gap: '12px' }}>
               {isOwnProfile ? (
                 <button
@@ -539,20 +551,28 @@ const ProfilePage = () => {
                   Edit Profile
                 </button>
               ) : (
-                <button
-                  onClick={handleFollow}
-                  style={{
-                    padding: '12px 24px',
-                    background: profile.is_following ? '#e2e8f0' : '#3b82f6',
-                    color: profile.is_following ? '#374151' : 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    fontWeight: '600'
-                  }}
-                >
-                  {profile.is_following ? 'Following' : 'Follow'}
-                </button>
+                <>
+                  <button
+                    onClick={handleFollow}
+                    style={{
+                      padding: '12px 24px',
+                      background: profile.is_following ? '#e2e8f0' : '#3b82f6',
+                      color: profile.is_following ? '#374151' : 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontWeight: '600'
+                    }}
+                  >
+                    {profile.is_following ? 'Following' : 'Follow'}
+                  </button>
+                  <MessageButton
+                    userId={profile.id}
+                    userName={profile.first_name}
+                    onChatCreated={handleChatCreated}
+                    onOpenChat={handleOpenChat}
+                  />
+                </>
               )}
             </div>
           </div>
@@ -673,7 +693,7 @@ const ProfilePage = () => {
                         key={post.id} 
                         post={post} 
                         onLike={handleLike}
-                        onFollow={() => {}} // No follow button on own posts
+                        onFollow={() => {}}
                         onCommentAdded={handleCommentAdded}
                       />
                     ))}
@@ -715,6 +735,12 @@ const ProfilePage = () => {
         onClose={() => setShowEditModal(false)}
         profile={profile}
         onProfileUpdated={handleProfileUpdated}
+      />
+
+      {/* ADD CHAT INTERFACE */}
+      <ChatInterface 
+        isOpen={showChat}
+        onClose={() => setShowChat(false)}
       />
 
       {/* Add CSS for spinner animation */}

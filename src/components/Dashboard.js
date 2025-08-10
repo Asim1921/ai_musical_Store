@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import PostCard from './PostCard';
 import SearchModal from './Search';
 import CreatePostModal from './CreatePostModal';
+import ChatInterface from './Chat';
 
 // API configuration
 const API_BASE = 'http://localhost:8000/api/social';
@@ -96,7 +97,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
   const [loading, setLoading] = useState(true);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
-
+  const [showChat, setShowChat] = useState(false);
   useEffect(() => {
     initializeDashboard();
   }, []);
@@ -326,27 +327,29 @@ const Dashboard = ({ setIsAuthenticated }) => {
 
               <div className="nav-menu">
                 {[
-                  { id: 'feed', icon: '🏠', label: 'Feed' },
-                  { id: 'profile', icon: '👤', label: 'My Profile' },
-                  { id: 'messages', icon: '💬', label: 'Messages' },
-                  { id: 'notifications', icon: '🔔', label: 'Notifications' },
-                  { id: 'settings', icon: '⚙️', label: 'Settings' },
-                ].map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      if (item.id === 'profile') {
-                        navigate('/profile');
-                      } else {
-                        // Handle other navigation here
-                      }
-                    }}
-                    className="nav-item"
-                  >
-                    <span className="nav-icon">{item.icon}</span>
-                    <span className="nav-label">{item.label}</span>
-                  </button>
-                ))}
+  { id: 'feed', icon: '🏠', label: 'Feed' },
+  { id: 'profile', icon: '👤', label: 'My Profile' },
+  { id: 'messages', icon: '💬', label: 'Messages' },
+  { id: 'notifications', icon: '🔔', label: 'Notifications' },
+  { id: 'settings', icon: '⚙️', label: 'Settings' },
+].map((item) => (
+  <button
+    key={item.id}
+    onClick={() => {
+      if (item.id === 'profile') {
+        navigate('/profile');
+      } else if (item.id === 'messages') {
+        setShowChat(true);
+      } else {
+        // Handle other navigation here
+      }
+    }}
+    className="nav-item"
+  >
+    <span className="nav-icon">{item.icon}</span>
+    <span className="nav-label">{item.label}</span>
+  </button>
+))}
               </div>
             </div>
           </div>
@@ -505,7 +508,10 @@ const Dashboard = ({ setIsAuthenticated }) => {
           </div>
         </div>
       </div>
-
+<ChatInterface 
+  isOpen={showChat}
+  onClose={() => setShowChat(false)}
+/>
       {/* Modals */}
       <CreatePostModal 
         isOpen={showCreatePost}
