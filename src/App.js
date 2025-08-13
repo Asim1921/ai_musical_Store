@@ -12,6 +12,7 @@ import EmailVerification from './components/EmailVerification';
 import ForgotPassword from './components/ForgotPassword';
 import Dashboard from './components/Dashboard';
 import ProfilePage from './components/ProfilePage';
+import CreatorDashboard from './components/CreatorDashboard';
 import './App.css';
 
 // Google OAuth Client ID
@@ -184,6 +185,14 @@ function App() {
                 element={
                   isAuthenticated ? 
                   <ProfilePage /> : 
+                  <Navigate to="/login" replace />
+                } 
+              />
+              <Route 
+                path="/creator-dashboard" 
+                element={
+                  isAuthenticated ? 
+                  <CreatorDashboard /> : 
                   <Navigate to="/login" replace />
                 } 
               />

@@ -6,6 +6,7 @@ import PostCard from './PostCard';
 import SearchModal from './Search';
 import CreatePostModal from './CreatePostModal';
 import ChatInterface from './Chat';
+import { Link } from 'react-router-dom';
 
 // API configuration
 const API_BASE = 'http://localhost:8000/api/social';
@@ -329,6 +330,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
                 {[
   { id: 'feed', icon: '🏠', label: 'Feed' },
   { id: 'profile', icon: '👤', label: 'My Profile' },
+  { id: 'creator-dashboard', icon: '📊', label: 'Creator Dashboard' },
   { id: 'messages', icon: '💬', label: 'Messages' },
   { id: 'notifications', icon: '🔔', label: 'Notifications' },
   { id: 'settings', icon: '⚙️', label: 'Settings' },
@@ -338,6 +340,8 @@ const Dashboard = ({ setIsAuthenticated }) => {
     onClick={() => {
       if (item.id === 'profile') {
         navigate('/profile');
+      } else if (item.id === 'creator-dashboard') {
+        navigate('/creator-dashboard');
       } else if (item.id === 'messages') {
         setShowChat(true);
       } else {
