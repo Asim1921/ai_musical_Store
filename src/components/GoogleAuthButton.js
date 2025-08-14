@@ -2,13 +2,13 @@ import React from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { API_ENDPOINTS } from '../config/api';
 
 const GoogleAuthButton = ({ setIsAuthenticated, onSuccess }) => {
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://ai-musical-store-backend-ndig.vercel.app';
-      const response = await axios.post(`${apiUrl}/api/auth/google-auth/`, {
+      const response = await axios.post(API_ENDPOINTS.GOOGLE_AUTH, {
         access_token: credentialResponse.credential
       });
 

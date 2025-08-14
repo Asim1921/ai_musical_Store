@@ -42,14 +42,13 @@ import {
   Psychology
 } from '@mui/icons-material';
 import toast from 'react-hot-toast';
-
-const API_BASE = `${process.env.REACT_APP_API_URL || 'https://ai-musical-store-backend-ndig.vercel.app'}/api/content`;
+import { API_ENDPOINTS } from '../config/api';
 
 const api = {
   getContent: async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/content/`, {
+      const response = await fetch(API_ENDPOINTS.CONTENT, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -68,7 +67,7 @@ const api = {
   getUnprocessedContent: async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/ai/unprocessed/`, {
+      const response = await fetch(API_ENDPOINTS.UNPROCESSED_CONTENT, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -87,7 +86,7 @@ const api = {
   processContent: async (contentId) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/ai/process/`, {
+      const response = await fetch(API_ENDPOINTS.PROCESS_CONTENT, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -108,7 +107,7 @@ const api = {
   batchProcess: async (contentIds, limit = 5) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/ai/batch-process/`, {
+      const response = await fetch(API_ENDPOINTS.BATCH_PROCESS, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -132,7 +131,7 @@ const api = {
   publishContent: async (contentId) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/content/${contentId}/publish/`, {
+      const response = await fetch(`${API_ENDPOINTS.PUBLISH_CONTENT}${contentId}/publish/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -152,7 +151,7 @@ const api = {
   getStats: async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/stats/`, {
+      const response = await fetch(API_ENDPOINTS.CONTENT_STATS, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

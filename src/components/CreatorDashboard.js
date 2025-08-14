@@ -61,8 +61,7 @@ import {
 } from '@mui/icons-material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart as RechartsBarChart, Bar } from 'recharts';
 import toast from 'react-hot-toast';
-
-const API_BASE = `${process.env.REACT_APP_API_URL || 'https://ai-musical-store-backend-ndig.vercel.app'}/api/content`;
+import { API_ENDPOINTS } from '../config/api';
 
 const CreatorDashboard = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -105,7 +104,7 @@ const CreatorDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/creator/dashboard/`, {
+      const response = await fetch(API_ENDPOINTS.CREATOR_DASHBOARD, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -129,7 +128,7 @@ const CreatorDashboard = () => {
   const fetchBulkUploads = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/creator/bulk-uploads/`, {
+      const response = await fetch(API_ENDPOINTS.BULK_UPLOADS, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -148,7 +147,7 @@ const CreatorDashboard = () => {
   const fetchCategories = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/categories/`, {
+      const response = await fetch(API_ENDPOINTS.CATEGORIES, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -183,7 +182,7 @@ const CreatorDashboard = () => {
       formData.append('category', uploadForm.category);
       formData.append('pdf_file', uploadForm.pdf_file);
 
-      const response = await fetch(`${API_BASE}/creator/bulk-upload/`, {
+      const response = await fetch(API_ENDPOINTS.BULK_UPLOAD, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -213,7 +212,7 @@ const CreatorDashboard = () => {
     
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/creator/generate-audio/`, {
+      const response = await fetch(API_ENDPOINTS.GENERATE_AUDIO, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -255,7 +254,7 @@ const CreatorDashboard = () => {
       }
       
              // Create new audio element - handle different audio file path formats
-       const baseUrl = process.env.REACT_APP_API_URL || 'https://ai-musical-store-backend-ndig.vercel.app';
+       const baseUrl = API_ENDPOINTS.CONTENT.replace('/api/content/content/', '');
        
        let audioUrl;
        if (audioFile.startsWith('/media/')) {

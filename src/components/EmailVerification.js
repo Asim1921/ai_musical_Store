@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { API_ENDPOINTS } from '../config/api';
 
 const EmailVerification = ({ setIsAuthenticated }) => {
   const [otp, setOtp] = useState('');
@@ -32,8 +33,7 @@ const EmailVerification = ({ setIsAuthenticated }) => {
     setLoading(true);
 
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://ai-musical-store-backend-ndig.vercel.app';
-      const response = await axios.post(`${apiUrl}/api/auth/verify-email/`, {
+      const response = await axios.post(API_ENDPOINTS.VERIFY_EMAIL, {
         email,
         otp
       });
@@ -57,8 +57,7 @@ const EmailVerification = ({ setIsAuthenticated }) => {
   const handleResendOTP = async () => {
     setResendLoading(true);
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://ai-musical-store-backend-ndig.vercel.app';
-      await axios.post(`${apiUrl}/api/auth/resend-otp/`, { email });
+      await axios.post(API_ENDPOINTS.RESEND_OTP, { email });
       toast.success('New OTP sent to your email!');
       setCountdown(60); // 60 second countdown
     } catch (error) {

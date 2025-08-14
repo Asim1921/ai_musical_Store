@@ -29,9 +29,10 @@ export const API_ENDPOINTS = {
   LOGOUT: `${currentConfig.baseURL}/api/auth/logout/`,
   REFRESH_TOKEN: `${currentConfig.baseURL}/api/auth/token/refresh/`,
   VERIFY_EMAIL: `${currentConfig.baseURL}/api/auth/verify-email/`,
+  RESEND_OTP: `${currentConfig.baseURL}/api/auth/resend-otp/`,
   FORGOT_PASSWORD: `${currentConfig.baseURL}/api/auth/forgot-password/`,
   RESET_PASSWORD: `${currentConfig.baseURL}/api/auth/reset-password/`,
-  GOOGLE_AUTH: `${currentConfig.baseURL}/api/auth/google/`,
+  GOOGLE_AUTH: `${currentConfig.baseURL}/api/auth/google-auth/`,
   
   // Social endpoints
   PROFILE: `${currentConfig.baseURL}/api/social/profile/`,
@@ -51,6 +52,19 @@ export const API_ENDPOINTS = {
   CREATE_CHAT: `${currentConfig.baseURL}/api/social/chats/create/`,
   CHAT_MESSAGES: `${currentConfig.baseURL}/api/social/chats/messages/`,
   SEND_MESSAGE: `${currentConfig.baseURL}/api/social/chats/send/`,
+  
+  // Content endpoints
+  CONTENT: `${currentConfig.baseURL}/api/content/content/`,
+  CONTENT_STATS: `${currentConfig.baseURL}/api/content/stats/`,
+  UNPROCESSED_CONTENT: `${currentConfig.baseURL}/api/content/ai/unprocessed/`,
+  PROCESS_CONTENT: `${currentConfig.baseURL}/api/content/ai/process/`,
+  BATCH_PROCESS: `${currentConfig.baseURL}/api/content/ai/batch-process/`,
+  PUBLISH_CONTENT: `${currentConfig.baseURL}/api/content/content/`,
+  CREATOR_DASHBOARD: `${currentConfig.baseURL}/api/content/creator/dashboard/`,
+  BULK_UPLOAD: `${currentConfig.baseURL}/api/content/creator/bulk-upload/`,
+  BULK_UPLOADS: `${currentConfig.baseURL}/api/content/creator/bulk-uploads/`,
+  GENERATE_AUDIO: `${currentConfig.baseURL}/api/content/creator/generate-audio/`,
+  CATEGORIES: `${currentConfig.baseURL}/api/content/categories/`,
   
   // Content endpoints
   CONTENT: `${currentConfig.baseURL}/api/content/`,

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { API_ENDPOINTS } from '../config/api';
 
 const ForgotPassword = () => {
   const [step, setStep] = useState(1); // 1: Email, 2: OTP & New Password
@@ -26,8 +27,7 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://ai-musical-store-backend-ndig.vercel.app';
-      await axios.post(`${apiUrl}/api/auth/password-reset/`, {
+      await axios.post(API_ENDPOINTS.FORGOT_PASSWORD, {
         email: formData.email
       });
       
@@ -51,8 +51,7 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://ai-musical-store-backend-ndig.vercel.app';
-      await axios.post(`${apiUrl}/api/auth/password-reset-confirm/`, {
+      await axios.post(API_ENDPOINTS.RESET_PASSWORD, {
         email: formData.email,
         otp: formData.otp,
         new_password: formData.new_password,
