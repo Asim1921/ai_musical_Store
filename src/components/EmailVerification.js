@@ -32,7 +32,9 @@ const EmailVerification = ({ setIsAuthenticated }) => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/auth/verify-email/', {
+      const response = await axios.post(process.env.NODE_ENV === 'development' 
+  ? 'http://127.0.0.1:8000/api/auth/verify-email/'
+  : 'https://ai-musical-store-backend-ndig.vercel.app/api/auth/verify-email/', {
         email,
         otp
       });
@@ -56,7 +58,9 @@ const EmailVerification = ({ setIsAuthenticated }) => {
   const handleResendOTP = async () => {
     setResendLoading(true);
     try {
-      await axios.post('http://127.0.0.1:8000/api/auth/resend-otp/', { email });
+      await axios.post(process.env.NODE_ENV === 'development' 
+  ? 'http://127.0.0.1:8000/api/auth/resend-otp/'
+  : 'https://ai-musical-store-backend-ndig.vercel.app/api/auth/resend-otp/', { email });
       toast.success('New OTP sent to your email!');
       setCountdown(60); // 60 second countdown
     } catch (error) {

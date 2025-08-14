@@ -43,7 +43,9 @@ import {
 } from '@mui/icons-material';
 import toast from 'react-hot-toast';
 
-const API_BASE = 'http://localhost:8000/api/content';
+const API_BASE = process.env.NODE_ENV === 'development' 
+  ? 'http://localhost:8000/api/content'
+  : 'https://ai-musical-store-backend-ndig.vercel.app/api/content';
 
 const api = {
   getContent: async () => {

@@ -2,7 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 
-const API_BASE = 'http://localhost:8000/api/social';
+const API_BASE = process.env.NODE_ENV === 'development' 
+  ? 'http://localhost:8000/api/social'
+  : 'https://ai-musical-store-backend-ndig.vercel.app/api/social';
 
 const commentApi = {
   getComments: async (postId) => {
