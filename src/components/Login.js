@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import toast from 'react-hot-toast';
 import GoogleAuthButton from './GoogleAuthButton';
+import { API_ENDPOINTS, apiRequest } from '../config/api';
 
 const Login = ({ setIsAuthenticated }) => {
   const [formData, setFormData] = useState({
@@ -28,28 +28,37 @@ const Login = ({ setIsAuthenticated }) => {
   console.log('Form data:', formData);
 
   try {
-    const response = await axios.post('http://127.0.0.1:8000/api/auth/login/', formData);
+    const response = await apiRequest(API_ENDPOINTS.LOGIN, {
+      method: 'POST',
+      body: JSON.stringify(formData),
+    });
     
-    // Store tokens
-    localStorage.setItem('access_token', response.data.tokens.access);
-    localStorage.setItem('refresh_token', response.data.tokens.refresh);
-    localStorage.setItem('user_data', JSON.stringify(response.data.user));
-    
-    setIsAuthenticated(true);
-    toast.success(`Welcome back, ${response.data.user.first_name}!`);
+    if (response.ok) {
+      const data = await response.json();
+      
+      // Store tokens
+      localStorage.setItem('access_token', data.tokens.access);
+      localStorage.setItem('refresh_token', data.tokens.refresh);
+      localStorage.setItem('user_data', JSON.stringify(data.user));
+      
+      setIsAuthenticated(true);
+      toast.success(`Welcome back, ${data.user.first_name}!`);
+    } else {
+      const errorData = await response.json();
+      
+      if (errorData.email_verification_required) {
+        toast.error('Please verify your email first');
+        navigate('/verify-email', { 
+          state: { email: formData.username.includes('@') ? formData.username : '' }
+        });
+      } else {
+        toast.error(errorData.error || 'Login failed. Please try again.');
+      }
+    }
     
   } catch (error) {
     console.error('Login error:', error);
-    console.log('Error response:', error.response?.data);
-    
-    if (error.response?.data?.email_verification_required) {
-      toast.error('Please verify your email first');
-      navigate('/verify-email', { 
-        state: { email: formData.username.includes('@') ? formData.username : '' }
-      });
-    } else {
-      toast.error(error.response?.data?.error || 'Login failed. Please try again.');
-    }
+    toast.error('Login failed. Please try again.');
   } finally {
     setLoading(false);
   }

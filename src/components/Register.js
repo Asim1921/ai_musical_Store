@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import toast from 'react-hot-toast';
 import GoogleAuthButton from './GoogleAuthButton';
+import { API_ENDPOINTS, apiRequest } from '../config/api';
 
 const Register = ({ setIsAuthenticated }) => {
   const [formData, setFormData] = useState({
@@ -35,29 +35,37 @@ const Register = ({ setIsAuthenticated }) => {
     }
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/auth/register/', formData);
-      
-      toast.success('Registration successful! Please check your email to verify your account.');
-      
-      // Redirect to email verification page
-      navigate('/verify-email', { 
-        state: { email: formData.email }
+      const response = await apiRequest(API_ENDPOINTS.REGISTER, {
+        method: 'POST',
+        body: JSON.stringify(formData),
       });
+      
+      if (response.ok) {
+        toast.success('Registration successful! Please check your email to verify your account.');
+        
+        // Redirect to email verification page
+        navigate('/verify-email', { 
+          state: { email: formData.email }
+        });
+      } else {
+        const errorData = await response.json();
+        if (errorData) {
+          Object.keys(errorData).forEach(key => {
+            const messages = errorData[key];
+            if (Array.isArray(messages)) {
+              messages.forEach(message => toast.error(`${key}: ${message}`));
+            } else {
+              toast.error(`${key}: ${messages}`);
+            }
+          });
+        } else {
+          toast.error('Registration failed. Please try again.');
+        }
+      }
       
     } catch (error) {
       console.error('Registration error:', error);
-      if (error.response?.data) {
-        Object.keys(error.response.data).forEach(key => {
-          const messages = error.response.data[key];
-          if (Array.isArray(messages)) {
-            messages.forEach(message => toast.error(`${key}: ${message}`));
-          } else {
-            toast.error(`${key}: ${messages}`);
-          }
-        });
-      } else {
-        toast.error('Registration failed. Please try again.');
-      }
+      toast.error('Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }

@@ -7,20 +7,12 @@ import SearchModal from './Search';
 import CreatePostModal from './CreatePostModal';
 import ChatInterface from './Chat';
 import { Link } from 'react-router-dom';
-
-// API configuration
-const API_BASE = 'http://localhost:8000/api/social';
+import { API_ENDPOINTS, apiRequest } from '../config/api';
 
 const api = {
   getFeed: async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/feed/`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        }
-      });
+      const response = await apiRequest(API_ENDPOINTS.POSTS);
       if (response.ok) {
         return await response.json();
       }
@@ -33,13 +25,7 @@ const api = {
 
   getUserProfile: async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/profile/`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        }
-      });
+      const response = await apiRequest(API_ENDPOINTS.PROFILE);
       if (response.ok) {
         return await response.json();
       }
@@ -52,13 +38,8 @@ const api = {
 
   toggleLike: async (postId) => {
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/posts/${postId}/like/`, {
+      const response = await apiRequest(`${API_ENDPOINTS.POSTS}${postId}/like/`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        }
       });
       if (response.ok) {
         return await response.json();
@@ -72,13 +53,8 @@ const api = {
 
   toggleFollow: async (userId) => {
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/users/${userId}/follow/`, {
+      const response = await apiRequest(`${API_ENDPOINTS.FOLLOW_USER}${userId}/`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        }
       });
       if (response.ok) {
         return await response.json();

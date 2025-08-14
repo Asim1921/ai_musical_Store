@@ -13,10 +13,11 @@ import ForgotPassword from './components/ForgotPassword';
 import Dashboard from './components/Dashboard';
 import ProfilePage from './components/ProfilePage';
 import CreatorDashboard from './components/CreatorDashboard';
+import { API_ENDPOINTS, apiRequest } from './config/api';
 import './App.css';
 
 // Google OAuth Client ID
-const GOOGLE_CLIENT_ID = "28222189286-ru4almtujkm68ligt44nu45b2r7u8cqi.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || "28222189286-ru4almtujkm68ligt44nu45b2r7u8cqi.apps.googleusercontent.com";
 
 const theme = createTheme({
   palette: {
@@ -70,12 +71,7 @@ function App() {
 
         // Test if the token is still valid by making a request
         console.log('🔐 Testing token validity...');
-        const response = await fetch('http://localhost:8000/api/social/profile/', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          }
-        });
+        const response = await apiRequest(API_ENDPOINTS.PROFILE);
 
         if (response.ok) {
           console.log('✅ Token is valid, user authenticated');
