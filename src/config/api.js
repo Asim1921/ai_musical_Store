@@ -37,8 +37,8 @@ export const API_ENDPOINTS = {
   // Social endpoints
   PROFILE: `${currentConfig.baseURL}/api/social/profile/`,
   UPDATE_PROFILE: `${currentConfig.baseURL}/api/social/profile/update/`,
-  FOLLOW_USER: `${currentConfig.baseURL}/api/social/follow/`,
-  UNFOLLOW_USER: `${currentConfig.baseURL}/api/social/unfollow/`,
+  FOLLOW_USER: `${currentConfig.baseURL}/api/social/users/`,
+  UNFOLLOW_USER: `${currentConfig.baseURL}/api/social/users/`,
   FOLLOWERS: `${currentConfig.baseURL}/api/social/followers/`,
   FOLLOWING: `${currentConfig.baseURL}/api/social/following/`,
   FEED: `${currentConfig.baseURL}/api/social/feed/`,

@@ -12,13 +12,14 @@ import { API_ENDPOINTS, apiRequest } from '../config/api';
 const api = {
   getFeed: async () => {
     try {
-      const response = await apiRequest(API_ENDPOINTS.FEED);
+      // Use the posts endpoint to get all posts (including own posts)
+      const response = await apiRequest(API_ENDPOINTS.POSTS);
       if (response.ok) {
         return await response.json();
       }
       throw new Error(`HTTP ${response.status}`);
     } catch (error) {
-      console.error('Error fetching feed:', error);
+      console.error('Error fetching posts:', error);
       return [];
     }
   },
