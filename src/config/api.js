@@ -54,7 +54,7 @@ export const API_ENDPOINTS = {
   SEND_MESSAGE: `${currentConfig.baseURL}/api/social/chats/send/`,
   
   // Content endpoints
-  CONTENT: `${currentConfig.baseURL}/api/content/content/`,
+  CONTENT: `${currentConfig.baseURL}/api/content/`,
   CONTENT_STATS: `${currentConfig.baseURL}/api/content/stats/`,
   UNPROCESSED_CONTENT: `${currentConfig.baseURL}/api/content/ai/unprocessed/`,
   PROCESS_CONTENT: `${currentConfig.baseURL}/api/content/ai/process/`,
@@ -65,9 +65,6 @@ export const API_ENDPOINTS = {
   BULK_UPLOADS: `${currentConfig.baseURL}/api/content/creator/bulk-uploads/`,
   GENERATE_AUDIO: `${currentConfig.baseURL}/api/content/creator/generate-audio/`,
   CATEGORIES: `${currentConfig.baseURL}/api/content/categories/`,
-  
-  // Content endpoints
-  CONTENT: `${currentConfig.baseURL}/api/content/`,
   AI_PROCESSING: `${currentConfig.baseURL}/api/content/ai/`,
   UPLOAD_CONTENT: `${currentConfig.baseURL}/api/content/upload/`,
   
