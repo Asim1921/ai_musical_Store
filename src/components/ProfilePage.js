@@ -1,5 +1,5 @@
 // STEP 3: Updated ProfilePage.js with Chat Integration
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import PostCard from './PostCard';
@@ -295,9 +295,9 @@ const ProfilePage = () => {
   useEffect(() => {
     loadProfile();
     loadPosts();
-  }, [username]);
+  }, [username, loadProfile, loadPosts]);
 
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     setLoading(true);
     try {
       const profileData = await profileApi.getUserProfile(username);
@@ -308,9 +308,9 @@ const ProfilePage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [username, navigate]);
 
-  const loadPosts = async () => {
+  const loadPosts = useCallback(async () => {
     setPostsLoading(true);
     try {
       const targetUsername = username || currentUser.username;
@@ -321,7 +321,7 @@ const ProfilePage = () => {
     } finally {
       setPostsLoading(false);
     }
-  };
+  }, [username, currentUser.username]);
 
   const handleFollow = async () => {
     if (!profile) return;

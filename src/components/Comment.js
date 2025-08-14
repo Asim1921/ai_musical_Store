@@ -1,5 +1,5 @@
 // src/components/Comment.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 
 const API_BASE = process.env.NODE_ENV === 'development' 
@@ -123,9 +123,9 @@ const CommentModal = ({ isOpen, onClose, postId, initialCommentsCount, onComment
     if (isOpen && postId) {
       loadComments();
     }
-  }, [isOpen, postId]);
+  }, [isOpen, postId, loadComments]);
 
-  const loadComments = async () => {
+  const loadComments = useCallback(async () => {
     setLoading(true);
     try {
       const commentsData = await commentApi.getComments(postId);
@@ -135,7 +135,7 @@ const CommentModal = ({ isOpen, onClose, postId, initialCommentsCount, onComment
     } finally {
       setLoading(false);
     }
-  };
+  }, [postId]);
 
   const handleSubmitComment = async (e) => {
     e.preventDefault();

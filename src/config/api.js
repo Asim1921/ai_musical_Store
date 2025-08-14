@@ -62,7 +62,6 @@ export const apiRequest = async (endpoint, options = {}) => {
 
   const config = {
     method: 'GET',
-    headers: defaultHeaders,
     ...options,
     headers: {
       ...defaultHeaders,

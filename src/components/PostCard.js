@@ -87,7 +87,7 @@ const PostCard = ({ post, onLike, onFollow, onCommentAdded }) => {
           <div style={{ marginBottom: '16px' }}>
             <img
               src={post.image_url}
-              alt="Post image"
+              alt="Post content"
               style={{
                 width: '100%',
                 borderRadius: '12px',

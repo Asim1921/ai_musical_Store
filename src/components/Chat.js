@@ -3,7 +3,7 @@
 // ================================================
 
 // src/components/Chat.js
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
 
 const API_BASE = process.env.NODE_ENV === 'development' 
@@ -233,7 +233,7 @@ const ChatInterface = ({ isOpen, onClose }) => {
     if (isOpen) {
       loadChats();
     }
-  }, [isOpen]);
+  }, [isOpen, loadChats]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -244,7 +244,7 @@ const ChatInterface = ({ isOpen, onClose }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const loadChats = async () => {
+  const loadChats = useCallback(async () => {
     setLoading(true);
     try {
       const chatsData = await chatApi.getChats();
@@ -260,9 +260,9 @@ const ChatInterface = ({ isOpen, onClose }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeChat, loadMessages]);
 
-  const loadMessages = async (chatId) => {
+  const loadMessages = useCallback(async (chatId) => {
     setMessagesLoading(true);
     try {
       const messagesData = await chatApi.getMessages(chatId);
@@ -272,7 +272,7 @@ const ChatInterface = ({ isOpen, onClose }) => {
     } finally {
       setMessagesLoading(false);
     }
-  };
+  }, []);
 
   const handleChatSelect = (chat) => {
     setActiveChat(chat);

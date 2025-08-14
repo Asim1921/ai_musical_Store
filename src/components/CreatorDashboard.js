@@ -17,7 +17,6 @@ import {
   ListItemText,
   ListItemAvatar,
   Divider,
-  Paper,
   IconButton,
   Dialog,
   DialogTitle,
@@ -32,17 +31,14 @@ import {
   CircularProgress,
   Fab,
   Tooltip,
-  Badge,
   Switch,
   FormControlLabel
 } from '@mui/material';
 import {
   TrendingUp,
   People,
-  PlayCircle,
   ThumbUp,
   Visibility,
-  Upload,
   Assessment,
   ContentPaste,
   Star,
@@ -53,28 +49,17 @@ import {
   Schedule,
   Add,
   Refresh,
-  FilterList,
   Search,
   PlayArrow,
   Pause,
   Stop,
   VolumeUp,
   Mic,
-  MicOff,
   Edit,
-  Delete,
-  Share,
   Analytics,
-  Timeline,
-  BarChart,
-  PieChart,
-  Speed,
-  TrendingDown,
-  VisibilityOff,
-  Favorite,
-  FavoriteBorder
+  Speed
 } from '@mui/icons-material';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart as RechartsBarChart, Bar, PieChart as RechartsPieChart, Pie, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart as RechartsBarChart, Bar } from 'recharts';
 import toast from 'react-hot-toast';
 
 const API_BASE = process.env.NODE_ENV === 'development' 

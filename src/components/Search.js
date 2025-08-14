@@ -1,5 +1,5 @@
 // src/components/Search.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 
 const API_BASE = process.env.NODE_ENV === 'development' 
@@ -169,9 +169,9 @@ const SearchModal = ({ isOpen, onClose, onFollowUpdate }) => {
       setResults([]);
       setHasSearched(false);
     }
-  }, [query]);
+  }, [query, handleSearch]);
 
-  const handleSearch = async () => {
+  const handleSearch = useCallback(async () => {
     if (query.length < 2) return;
     
     setLoading(true);
@@ -186,7 +186,7 @@ const SearchModal = ({ isOpen, onClose, onFollowUpdate }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [query]);
 
   const handleFollow = async (userId) => {
     try {

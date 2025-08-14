@@ -6,7 +6,7 @@ import PostCard from './PostCard';
 import SearchModal from './Search';
 import CreatePostModal from './CreatePostModal';
 import ChatInterface from './Chat';
-import { Link } from 'react-router-dom';
+
 import { API_ENDPOINTS, apiRequest } from '../config/api';
 
 const api = {
