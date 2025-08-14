@@ -7,14 +7,20 @@ const API_CONFIG = {
   },
   // Production API (Vercel deployed)
   production: {
-    baseURL: process.env.REACT_APP_API_URL || 'https://ai-musical-store-backend-ndig.vercel.app',
+    baseURL: process.env.REACT_APP_API_URL || 'https://ai-musical-store-backend-ndig-6glxpgswn-asimzamans-projects.vercel.app',
     timeout: 30000, // Longer timeout for serverless functions
+  },
+  // Development with CORS proxy (temporary solution)
+  developmentWithProxy: {
+    baseURL: 'https://cors-anywhere.herokuapp.com/https://ai-musical-store-backend-ndig-6glxpgswn-asimzamans-projects.vercel.app',
+    timeout: 30000,
   }
 };
 
 // Get current environment
+// Use CORS proxy for local development to bypass CORS issues
 const isDevelopment = process.env.NODE_ENV === 'development';
-const currentConfig = isDevelopment ? API_CONFIG.development : API_CONFIG.production;
+const currentConfig = isDevelopment ? API_CONFIG.developmentWithProxy : API_CONFIG.production;
 
 // API endpoints
 export const API_ENDPOINTS = {
@@ -124,6 +130,14 @@ export const getEnvironmentInfo = () => ({
   isDevelopment,
   baseURL: currentConfig.baseURL,
   timeout: currentConfig.timeout,
+});
+
+// Debug logging
+console.log('🔧 API Configuration:', {
+  NODE_ENV: process.env.NODE_ENV,
+  REACT_APP_API_URL: process.env.REACT_APP_API_URL,
+  isDevelopment,
+  baseURL: currentConfig.baseURL
 });
 
 export default API_ENDPOINTS;
