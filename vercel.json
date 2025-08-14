@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "REACT_APP_API_URL": "https://ai-musical-store-backend-ndig.vercel.app",
+    "REACT_APP_ENVIRONMENT": "production",
+    "REACT_APP_GOOGLE_CLIENT_ID": "28222189286-ru4almtujkm68ligt44nu45b2r7u8cqi.apps.googleusercontent.com"
+  }
+}
