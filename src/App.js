@@ -117,7 +117,7 @@ function App() {
           marginBottom: '16px'
         }}></div>
         <p style={{ color: '#64748b' }}>Checking authentication...</p>
-        <style jsx>{`
+        <style>{`
           @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }

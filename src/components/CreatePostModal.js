@@ -1,33 +1,71 @@
 // src/components/CreatePostModal.js
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
-
-const API_BASE = `${process.env.REACT_APP_API_URL || 'https://ai-musical-store-backend-ndig.vercel.app'}/api/social`;
+import { API_ENDPOINTS } from '../config/api';
 
 const postApi = {
   createPost: async (postData) => {
     try {
       const token = localStorage.getItem('access_token');
-      const formData = new FormData();
+      console.log('Creating post with data:', postData);
+      console.log('Token:', token ? 'Present' : 'Missing');
       
-      Object.keys(postData).forEach(key => {
-        if (postData[key] !== null && postData[key] !== undefined) {
-          formData.append(key, postData[key]);
-        }
+      // Check if we have an image file
+      const hasImage = postData.image instanceof File;
+      
+      let requestData;
+      let headers = {
+        'Authorization': `Bearer ${token}`,
+      };
+      
+      if (hasImage) {
+        // Use FormData for file uploads
+        const formData = new FormData();
+        Object.keys(postData).forEach(key => {
+          if (postData[key] !== null && postData[key] !== undefined) {
+            formData.append(key, postData[key]);
+            console.log(`Added to FormData: ${key} =`, postData[key]);
+          }
+        });
+        requestData = formData;
+      } else {
+        // Use JSON for text-only posts
+        headers['Content-Type'] = 'application/json';
+        requestData = JSON.stringify({
+          title: postData.title,
+          content: postData.content || '',  // Ensure content is never null
+          post_type: postData.post_type,
+          link_url: postData.link_url || ''  // Ensure link_url is never null
+        });
+        console.log('Sending JSON data:', requestData);
+      }
+
+      const response = await fetch(API_ENDPOINTS.CREATE_POST, {
+        method: 'POST',
+        headers: headers,
+        body: requestData
       });
 
-      const response = await fetch(`${API_BASE}/posts/create/`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData
-      });
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
       if (response.ok) {
-        return await response.json();
+        const result = await response.json();
+        console.log('Success response:', result);
+        return result;
       }
-      throw new Error(`HTTP ${response.status}`);
+      
+      // Try to get error details
+      let errorDetails = '';
+      try {
+        const errorResponse = await response.json();
+        errorDetails = JSON.stringify(errorResponse);
+      } catch (e) {
+        errorDetails = await response.text();
+      }
+      
+      console.error('Error response:', errorDetails);
+      throw new Error(`HTTP ${response.status}: ${errorDetails}`);
     } catch (error) {
       console.error('Error creating post:', error);
       throw error;

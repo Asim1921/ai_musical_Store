@@ -7,20 +7,19 @@ const API_CONFIG = {
   },
   // Production API (Vercel deployed)
   production: {
-    baseURL: process.env.REACT_APP_API_URL || 'https://ai-musical-store-backend-ndig-6glxpgswn-asimzamans-projects.vercel.app',
+    baseURL: process.env.REACT_APP_API_URL || 'https://ai-musical-store-backend-ndig.vercel.app',
     timeout: 30000, // Longer timeout for serverless functions
-  },
-  // Development with CORS proxy (temporary solution)
-  developmentWithProxy: {
-    baseURL: 'https://cors-anywhere.herokuapp.com/https://ai-musical-store-backend-ndig-6glxpgswn-asimzamans-projects.vercel.app',
-    timeout: 30000,
   }
 };
 
 // Get current environment
-// Use CORS proxy for local development to bypass CORS issues
 const isDevelopment = process.env.NODE_ENV === 'development';
-const currentConfig = isDevelopment ? API_CONFIG.developmentWithProxy : API_CONFIG.production;
+
+// Allow overriding the API URL for testing
+const overrideApiUrl = process.env.REACT_APP_API_URL;
+const currentConfig = overrideApiUrl 
+  ? { baseURL: overrideApiUrl, timeout: 30000 }
+  : (isDevelopment ? API_CONFIG.development : API_CONFIG.production);
 
 // API endpoints
 export const API_ENDPOINTS = {
@@ -41,12 +40,17 @@ export const API_ENDPOINTS = {
   UNFOLLOW_USER: `${currentConfig.baseURL}/api/social/unfollow/`,
   FOLLOWERS: `${currentConfig.baseURL}/api/social/followers/`,
   FOLLOWING: `${currentConfig.baseURL}/api/social/following/`,
+  FEED: `${currentConfig.baseURL}/api/social/feed/`,
   POSTS: `${currentConfig.baseURL}/api/social/posts/`,
   CREATE_POST: `${currentConfig.baseURL}/api/social/posts/create/`,
   LIKE_POST: `${currentConfig.baseURL}/api/social/posts/like/`,
   UNLIKE_POST: `${currentConfig.baseURL}/api/social/posts/unlike/`,
   COMMENT_POST: `${currentConfig.baseURL}/api/social/posts/comment/`,
   SEARCH: `${currentConfig.baseURL}/api/social/search/`,
+  CHATS: `${currentConfig.baseURL}/api/social/chats/`,
+  CREATE_CHAT: `${currentConfig.baseURL}/api/social/chats/create/`,
+  CHAT_MESSAGES: `${currentConfig.baseURL}/api/social/chats/messages/`,
+  SEND_MESSAGE: `${currentConfig.baseURL}/api/social/chats/send/`,
   
   // Content endpoints
   CONTENT: `${currentConfig.baseURL}/api/content/`,
@@ -130,14 +134,6 @@ export const getEnvironmentInfo = () => ({
   isDevelopment,
   baseURL: currentConfig.baseURL,
   timeout: currentConfig.timeout,
-});
-
-// Debug logging
-console.log('🔧 API Configuration:', {
-  NODE_ENV: process.env.NODE_ENV,
-  REACT_APP_API_URL: process.env.REACT_APP_API_URL,
-  isDevelopment,
-  baseURL: currentConfig.baseURL
 });
 
 export default API_ENDPOINTS;

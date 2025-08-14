@@ -2,13 +2,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 
-const API_BASE = `${process.env.REACT_APP_API_URL || 'https://ai-musical-store-backend-ndig.vercel.app'}/api/social`;
+import { API_ENDPOINTS } from '../config/api';
 
 const searchApi = {
   searchUsers: async (query) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/search/users/?q=${encodeURIComponent(query)}`, {
+      const response = await fetch(`${API_ENDPOINTS.SEARCH}users/?q=${encodeURIComponent(query)}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -27,7 +27,7 @@ const searchApi = {
   toggleFollow: async (userId) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/users/${userId}/follow/`, {
+      const response = await fetch(`${API_ENDPOINTS.FOLLOW_USER}${userId}/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -156,19 +156,6 @@ const SearchModal = ({ isOpen, onClose, onFollowUpdate }) => {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  useEffect(() => {
-    if (query.length >= 2) {
-      const timeoutId = setTimeout(() => {
-        handleSearch();
-      }, 300); // Debounce search
-      
-      return () => clearTimeout(timeoutId);
-    } else {
-      setResults([]);
-      setHasSearched(false);
-    }
-  }, [query, handleSearch]);
-
   const handleSearch = useCallback(async () => {
     if (query.length < 2) return;
     
@@ -185,6 +172,19 @@ const SearchModal = ({ isOpen, onClose, onFollowUpdate }) => {
       setLoading(false);
     }
   }, [query]);
+
+  useEffect(() => {
+    if (query.length >= 2) {
+      const timeoutId = setTimeout(() => {
+        handleSearch();
+      }, 300); // Debounce search
+      
+      return () => clearTimeout(timeoutId);
+    } else {
+      setResults([]);
+      setHasSearched(false);
+    }
+  }, [query, handleSearch]);
 
   const handleFollow = async (userId) => {
     try {

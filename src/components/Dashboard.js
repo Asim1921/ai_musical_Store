@@ -12,7 +12,7 @@ import { API_ENDPOINTS, apiRequest } from '../config/api';
 const api = {
   getFeed: async () => {
     try {
-      const response = await apiRequest(API_ENDPOINTS.POSTS);
+      const response = await apiRequest(API_ENDPOINTS.FEED);
       if (response.ok) {
         return await response.json();
       }

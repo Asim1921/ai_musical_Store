@@ -6,13 +6,13 @@ import PostCard from './PostCard';
 import MessageButton from './MessageButton';
 import ChatInterface from './Chat';  // Add this import
 
-const API_BASE = `${process.env.REACT_APP_API_URL || 'https://ai-musical-store-backend-ndig.vercel.app'}/api/social`;
+import { API_ENDPOINTS } from '../config/api';
 
 const profileApi = {
   getUserProfile: async (username = null) => {
     try {
       const token = localStorage.getItem('access_token');
-      const url = username ? `${API_BASE}/profile/${username}/` : `${API_BASE}/profile/`;
+      const url = username ? `${API_ENDPOINTS.PROFILE}${username}/` : API_ENDPOINTS.PROFILE;
       
       const response = await fetch(url, {
         headers: {
@@ -33,7 +33,7 @@ const profileApi = {
   getUserPosts: async (username) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/profile/${username}/posts/`, {
+      const response = await fetch(`${API_ENDPOINTS.PROFILE}${username}/posts/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -60,7 +60,7 @@ const profileApi = {
         }
       });
 
-      const response = await fetch(`${API_BASE}/profile/update/`, {
+      const response = await fetch(API_ENDPOINTS.UPDATE_PROFILE, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -81,7 +81,7 @@ const profileApi = {
   toggleFollow: async (userId) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/users/${userId}/follow/`, {
+      const response = await fetch(`${API_ENDPOINTS.FOLLOW_USER}${userId}/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -101,7 +101,7 @@ const profileApi = {
   toggleLike: async (postId) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/posts/${postId}/like/`, {
+      const response = await fetch(`${API_ENDPOINTS.POSTS}${postId}/like/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

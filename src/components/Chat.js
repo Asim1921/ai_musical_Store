@@ -6,14 +6,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
 
-const API_BASE = `${process.env.REACT_APP_API_URL || 'https://ai-musical-store-backend-ndig.vercel.app'}/api/social`;
+import { API_ENDPOINTS } from '../config/api';
 
 // Chat API functions
 const chatApi = {
   getChats: async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/chats/`, {
+      const response = await fetch(API_ENDPOINTS.CHATS, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -32,7 +32,7 @@ const chatApi = {
   createChat: async (userId) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/chats/create/${userId}/`, {
+      const response = await fetch(`${API_ENDPOINTS.CREATE_CHAT}${userId}/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -52,7 +52,7 @@ const chatApi = {
   getMessages: async (chatId) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/chats/${chatId}/messages/`, {
+      const response = await fetch(`${API_ENDPOINTS.CHAT_MESSAGES}${chatId}/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -71,7 +71,7 @@ const chatApi = {
   sendMessage: async (chatId, content) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/chats/${chatId}/send/`, {
+      const response = await fetch(`${API_ENDPOINTS.SEND_MESSAGE}${chatId}/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -226,21 +226,21 @@ const ChatInterface = ({ isOpen, onClose }) => {
 
   const currentUser = JSON.parse(localStorage.getItem('user_data'));
 
-  // Load chats when component opens
-  useEffect(() => {
-    if (isOpen) {
-      loadChats();
-    }
-  }, [isOpen, loadChats]);
-
-  // Auto-scroll to bottom when new messages arrive
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  const loadMessages = useCallback(async (chatId) => {
+    setMessagesLoading(true);
+    try {
+      const messagesData = await chatApi.getMessages(chatId);
+      setMessages(messagesData);
+    } catch (error) {
+      toast.error('Failed to load messages');
+    } finally {
+      setMessagesLoading(false);
+    }
+  }, []);
 
   const loadChats = useCallback(async () => {
     setLoading(true);
@@ -260,17 +260,17 @@ const ChatInterface = ({ isOpen, onClose }) => {
     }
   }, [activeChat, loadMessages]);
 
-  const loadMessages = useCallback(async (chatId) => {
-    setMessagesLoading(true);
-    try {
-      const messagesData = await chatApi.getMessages(chatId);
-      setMessages(messagesData);
-    } catch (error) {
-      toast.error('Failed to load messages');
-    } finally {
-      setMessagesLoading(false);
+  // Load chats when component opens
+  useEffect(() => {
+    if (isOpen) {
+      loadChats();
     }
-  }, []);
+  }, [isOpen, loadChats]);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleChatSelect = (chat) => {
     setActiveChat(chat);

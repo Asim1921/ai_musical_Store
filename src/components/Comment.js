@@ -2,13 +2,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 
-const API_BASE = `${process.env.REACT_APP_API_URL || 'https://ai-musical-store-backend-ndig.vercel.app'}/api/social`;
+import { API_ENDPOINTS } from '../config/api';
 
 const commentApi = {
   getComments: async (postId) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/posts/${postId}/comments/`, {
+      const response = await fetch(`${API_ENDPOINTS.POSTS}${postId}/comments/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -27,7 +27,7 @@ const commentApi = {
   createComment: async (postId, content) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE}/posts/${postId}/comments/create/`, {
+      const response = await fetch(`${API_ENDPOINTS.POSTS}${postId}/comments/create/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -117,12 +117,6 @@ const CommentModal = ({ isOpen, onClose, postId, initialCommentsCount, onComment
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (isOpen && postId) {
-      loadComments();
-    }
-  }, [isOpen, postId, loadComments]);
-
   const loadComments = useCallback(async () => {
     setLoading(true);
     try {
@@ -134,6 +128,12 @@ const CommentModal = ({ isOpen, onClose, postId, initialCommentsCount, onComment
       setLoading(false);
     }
   }, [postId]);
+
+  useEffect(() => {
+    if (isOpen && postId) {
+      loadComments();
+    }
+  }, [isOpen, postId, loadComments]);
 
   const handleSubmitComment = async (e) => {
     e.preventDefault();
