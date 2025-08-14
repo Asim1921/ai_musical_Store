@@ -54,7 +54,7 @@ const api = {
 
   toggleFollow: async (userId) => {
     try {
-      const response = await apiRequest(`${API_ENDPOINTS.FOLLOW_USER}${userId}/follow/`, {
+      const response = await apiRequest(`${API_ENDPOINTS.FOLLOW_USER}${userId}/`, {
         method: 'POST',
       });
       if (response.ok) {

@@ -27,7 +27,7 @@ const searchApi = {
   toggleFollow: async (userId) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_ENDPOINTS.FOLLOW_USER}${userId}/follow/`, {
+      const response = await fetch(`${API_ENDPOINTS.FOLLOW_USER}${userId}/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
