@@ -7,9 +7,8 @@ const GoogleAuthButton = ({ setIsAuthenticated, onSuccess }) => {
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      const response = await axios.post(process.env.NODE_ENV === 'development' 
-  ? 'http://127.0.0.1:8000/api/auth/google-auth/'
-  : 'https://ai-musical-store-backend-ndig.vercel.app/api/auth/google-auth/', {
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://ai-musical-store-backend-ndig.vercel.app';
+      const response = await axios.post(`${apiUrl}/api/auth/google-auth/`, {
         access_token: credentialResponse.credential
       });
 

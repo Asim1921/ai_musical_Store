@@ -62,9 +62,7 @@ import {
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart as RechartsBarChart, Bar } from 'recharts';
 import toast from 'react-hot-toast';
 
-const API_BASE = process.env.NODE_ENV === 'development' 
-  ? 'http://localhost:8000/api/content'
-  : 'https://ai-musical-store-backend-ndig.vercel.app/api/content';
+const API_BASE = `${process.env.REACT_APP_API_URL || 'https://ai-musical-store-backend-ndig.vercel.app'}/api/content`;
 
 const CreatorDashboard = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -257,9 +255,7 @@ const CreatorDashboard = () => {
       }
       
              // Create new audio element - handle different audio file path formats
-       const baseUrl = process.env.NODE_ENV === 'development' 
-         ? 'http://localhost:8000'
-         : 'https://ai-musical-store-backend-ndig.vercel.app';
+       const baseUrl = process.env.REACT_APP_API_URL || 'https://ai-musical-store-backend-ndig.vercel.app';
        
        let audioUrl;
        if (audioFile.startsWith('/media/')) {

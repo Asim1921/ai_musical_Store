@@ -6,9 +6,7 @@ import PostCard from './PostCard';
 import MessageButton from './MessageButton';
 import ChatInterface from './Chat';  // Add this import
 
-const API_BASE = process.env.NODE_ENV === 'development' 
-  ? 'http://localhost:8000/api/social'
-  : 'https://ai-musical-store-backend-ndig.vercel.app/api/social';
+const API_BASE = `${process.env.REACT_APP_API_URL || 'https://ai-musical-store-backend-ndig.vercel.app'}/api/social`;
 
 const profileApi = {
   getUserProfile: async (username = null) => {
