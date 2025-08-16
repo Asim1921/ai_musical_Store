@@ -265,6 +265,11 @@ const ChatInterface = ({ isOpen, onClose }) => {
     try {
       const messagesData = await chatApi.getMessages(chatId);
       setMessages(messagesData);
+      
+      // Refresh chat list to update unread counts
+      setTimeout(() => {
+        loadChats();
+      }, 1000);
     } catch (error) {
       toast.error('Failed to load messages');
     } finally {

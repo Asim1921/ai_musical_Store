@@ -1,85 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  Tabs,
-  Tab,
-  LinearProgress,
-  Chip,
-  Avatar,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
-  Divider,
-  Paper,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Alert,
-  CircularProgress,
-  Fab,
-  Tooltip,
-  Badge,
-  Switch,
-  FormControlLabel
-} from '@mui/material';
-import {
-  TrendingUp,
-  People,
-  PlayCircle,
-  ThumbUp,
-  Visibility,
-  Upload,
-  Assessment,
-  ContentPaste,
-  Star,
-  MoreVert,
-  CloudUpload,
-  CheckCircle,
-  Error,
-  Schedule,
-  Add,
-  Refresh,
-  FilterList,
-  Search,
-  PlayArrow,
-  Pause,
-  Stop,
-  VolumeUp,
-  Mic,
-  MicOff,
-  Edit,
-  Delete,
-  Share,
-  Analytics,
-  Timeline,
-  BarChart,
-  PieChart,
-  Speed,
-  TrendingDown,
-  VisibilityOff,
-  Favorite,
-  FavoriteBorder
-} from '@mui/icons-material';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart as RechartsBarChart, Bar, PieChart as RechartsPieChart, Pie, Cell } from 'recharts';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 const API_BASE = 'http://localhost:8000/api/content';
 
 const CreatorDashboard = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(0);
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -223,7 +149,7 @@ const CreatorDashboard = () => {
     }
   };
 
-    const generateAudioForContent = async (contentId, contentTitle) => {
+  const generateAudioForContent = async (contentId, contentTitle) => {
     setProcessingAudio(prev => ({ ...prev, [contentId]: true }));
     
     try {
@@ -242,7 +168,6 @@ const CreatorDashboard = () => {
 
       if (response.ok) {
         toast.success(`Audio generation started for "${contentTitle}"`);
-        // Refresh dashboard data after a delay
         setTimeout(() => {
           fetchDashboardData();
         }, 3000);
@@ -259,38 +184,25 @@ const CreatorDashboard = () => {
 
   const playAudio = async (contentId, audioFile) => {
     try {
-      console.log('Playing audio for content:', contentId);
-      console.log('Audio file path:', audioFile);
       setAudioLoading(prev => ({ ...prev, [contentId]: true }));
       
-      // Stop any currently playing audio
       if (audioPlayer) {
         audioPlayer.pause();
         audioPlayer.currentTime = 0;
       }
       
-             // Create new audio element - handle different audio file path formats
-       let audioUrl;
-       if (audioFile.startsWith('/media/')) {
-         // If audioFile already includes /media/, use it directly
-         audioUrl = `http://localhost:8000${audioFile}`;
-       } else if (audioFile.startsWith('media/')) {
-         // If audioFile starts with media/, add the server URL
-         audioUrl = `http://localhost:8000/${audioFile}`;
-       } else {
-         // Default case: audioFile is just the relative path
-         audioUrl = `http://localhost:8000/media/${audioFile}`;
-       }
-       
-       console.log('Audio URL:', audioUrl);
-       const audio = new Audio(audioUrl);
+      let audioUrl;
+      if (audioFile.startsWith('/media/')) {
+        audioUrl = `http://localhost:8000${audioFile}`;
+      } else if (audioFile.startsWith('media/')) {
+        audioUrl = `http://localhost:8000/${audioFile}`;
+      } else {
+        audioUrl = `http://localhost:8000/media/${audioFile}`;
+      }
       
-      audio.addEventListener('loadstart', () => {
-        console.log('Audio loading started');
-      });
+      const audio = new Audio(audioUrl);
       
       audio.addEventListener('canplay', () => {
-        console.log('Audio can play');
         setAudioLoading(prev => ({ ...prev, [contentId]: false }));
       });
       
@@ -312,7 +224,6 @@ const CreatorDashboard = () => {
         setAudioLoading(prev => ({ ...prev, [contentId]: false }));
       });
       
-      // Start playing
       await audio.play();
       setAudioPlayer(audio);
       
@@ -340,19 +251,19 @@ const CreatorDashboard = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'completed': return 'success';
-      case 'processing': return 'warning';
-      case 'failed': return 'error';
-      default: return 'default';
+      case 'completed': return '#10b981';
+      case 'processing': return '#f59e0b';
+      case 'failed': return '#ef4444';
+      default: return '#6b7280';
     }
   };
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'completed': return <CheckCircle />;
-      case 'processing': return <Schedule />;
-      case 'failed': return <Error />;
-      default: return <Schedule />;
+      case 'completed': return '✅';
+      case 'processing': return '⏳';
+      case 'failed': return '❌';
+      default: return '⏳';
     }
   };
 
@@ -366,820 +277,868 @@ const CreatorDashboard = () => {
 
   if (loading) {
     return (
-      <Box 
-        display="flex" 
-        justifyContent="center" 
-        alignItems="center" 
-        minHeight="80vh"
-        sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
-      >
-        <Box textAlign="center">
-          <CircularProgress size={60} sx={{ color: 'white', mb: 2 }} />
-          <Typography variant="h6" color="white">
-            Loading Creator Dashboard...
-          </Typography>
-        </Box>
-      </Box>
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#f8fafc'
+      }}>
+        <div style={{
+          width: '40px',
+          height: '40px',
+          border: '4px solid #e2e8f0',
+          borderTop: '4px solid #3b82f6',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite'
+        }}></div>
+      </div>
     );
   }
 
   if (!dashboardData) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Alert severity="error" sx={{ fontSize: '1.1rem', py: 2 }}>
-          Failed to load dashboard data. Please refresh the page.
-        </Alert>
-      </Container>
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#f8fafc'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <h2>Failed to load dashboard data</h2>
+          <button onClick={fetchDashboardData} style={{
+            padding: '12px 24px',
+            background: '#3b82f6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer'
+          }}>
+            Refresh
+          </button>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-      py: 3
-    }}>
-      <Container maxWidth="xl">
-                 {/* Header Section */}
-         <Box mb={4}>
-           <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-             <Box>
-               <Typography variant="h3" gutterBottom sx={{ 
-                 fontWeight: 700, 
-                 background: 'linear-gradient(45deg, #667eea, #764ba2)',
-                 backgroundClip: 'text',
-                 WebkitBackgroundClip: 'text',
-                 WebkitTextFillColor: 'transparent'
-               }}>
-                 Creator Dashboard
-               </Typography>
-               <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 400 }}>
-                 Welcome back, {dashboardData.username}! Here's your content performance overview.
-               </Typography>
-             </Box>
-             <Box display="flex" gap={2}>
-               <Button
-                 variant="outlined"
-                 startIcon={<Refresh />}
-                 onClick={fetchDashboardData}
-                 sx={{ borderRadius: 2 }}
-               >
-                 Refresh
-               </Button>
-               <Button
-                 variant="contained"
-                 startIcon={<Add />}
-                 onClick={() => setUploadDialogOpen(true)}
-                 sx={{ 
-                   borderRadius: 2,
-                   background: 'linear-gradient(45deg, #667eea, #764ba2)',
-                   '&:hover': {
-                     background: 'linear-gradient(45deg, #5a6fd8, #6a4190)'
-                   }
-                 }}
-               >
-                 Upload Content
-               </Button>
-             </Box>
-           </Box>
-         </Box>
-
-         {/* Audio Player Controls */}
-         {currentlyPlaying && (
-           <Box mb={3}>
-             <Card sx={{ 
-               borderRadius: 3, 
-               background: 'linear-gradient(45deg, #667eea, #764ba2)',
-               color: 'white'
-             }}>
-               <CardContent>
-                 <Box display="flex" alignItems="center" justifyContent="space-between">
-                   <Box display="flex" alignItems="center" gap={2}>
-                     <VolumeUp sx={{ fontSize: 32 }} />
-                     <Box>
-                       <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                         Now Playing
-                       </Typography>
-                       <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                         {dashboardData?.recent_content?.find(c => c.id === currentlyPlaying)?.title || 'Audio'}
-                       </Typography>
-                     </Box>
-                   </Box>
-                   <Box display="flex" gap={1}>
-                     <IconButton 
-                       onClick={pauseAudio}
-                       sx={{ color: 'white' }}
-                     >
-                       <Pause />
-                     </IconButton>
-                     <IconButton 
-                       onClick={stopAudio}
-                       sx={{ color: 'white' }}
-                     >
-                       <Stop />
-                     </IconButton>
-                   </Box>
-                 </Box>
-               </CardContent>
-             </Card>
-           </Box>
-         )}
-
-        {/* Analytics Cards */}
-        <Grid container spacing={3} mb={4}>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ 
-              borderRadius: 3, 
-              boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white'
-            }}>
-              <CardContent>
-                <Box display="flex" alignItems="center" justifyContent="space-between">
-                  <Box>
-                    <Typography color="rgba(255,255,255,0.8)" gutterBottom sx={{ fontSize: '0.9rem' }}>
-                      Total Followers
-                    </Typography>
-                    <Typography variant="h3" sx={{ fontWeight: 700 }}>
-                      {dashboardData.followers_count || 0}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                      +12% this month
-                    </Typography>
-                  </Box>
-                  <People sx={{ fontSize: 50, opacity: 0.8 }} />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ 
-              borderRadius: 3, 
-              boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-              background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-              color: 'white'
-            }}>
-              <CardContent>
-                <Box display="flex" alignItems="center" justifyContent="space-between">
-                  <Box>
-                    <Typography color="rgba(255,255,255,0.8)" gutterBottom sx={{ fontSize: '0.9rem' }}>
-                      Total Views
-                    </Typography>
-                    <Typography variant="h3" sx={{ fontWeight: 700 }}>
-                      {dashboardData.content_performance?.total_views || 0}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                      +8% this week
-                    </Typography>
-                  </Box>
-                  <Visibility sx={{ fontSize: 50, opacity: 0.8 }} />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ 
-              borderRadius: 3, 
-              boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-              background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-              color: 'white'
-            }}>
-              <CardContent>
-                <Box display="flex" alignItems="center" justifyContent="space-between">
-                  <Box>
-                    <Typography color="rgba(255,255,255,0.8)" gutterBottom sx={{ fontSize: '0.9rem' }}>
-                      Total Likes
-                    </Typography>
-                    <Typography variant="h3" sx={{ fontWeight: 700 }}>
-                      {dashboardData.content_performance?.total_likes || 0}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                      +15% this month
-                    </Typography>
-                  </Box>
-                  <ThumbUp sx={{ fontSize: 50, opacity: 0.8 }} />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ 
-              borderRadius: 3, 
-              boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-              background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-              color: 'white'
-            }}>
-              <CardContent>
-                <Box display="flex" alignItems="center" justifyContent="space-between">
-                  <Box>
-                    <Typography color="rgba(255,255,255,0.8)" gutterBottom sx={{ fontSize: '0.9rem' }}>
-                      Engagement Rate
-                    </Typography>
-                    <Typography variant="h3" sx={{ fontWeight: 700 }}>
-                      {dashboardData.content_performance?.average_engagement_rate || 0}%
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                      +5% this week
-                    </Typography>
-                  </Box>
-                  <TrendingUp sx={{ fontSize: 50, opacity: 0.8 }} />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-
-        {/* Main Content Area */}
-        <Card sx={{ borderRadius: 3, boxShadow: '0 8px 32px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs 
-              value={activeTab} 
-              onChange={(e, newValue) => setActiveTab(newValue)}
-              sx={{
-                '& .MuiTab-root': {
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  minHeight: 64
-                }
+    <div style={{ minHeight: '100vh', background: '#f8fafc' }}>
+      {/* Header */}
+      <div style={{
+        background: 'white',
+        borderBottom: '1px solid #e2e8f0',
+        padding: '16px 0'
+      }}>
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '0 24px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px'
+        }}>
+          <button
+            onClick={() => navigate('/dashboard')}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '20px',
+              cursor: 'pointer',
+              padding: '8px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            ←
+          </button>
+          <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '700' }}>
+            Creator Dashboard
+          </h1>
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: '12px' }}>
+            <button
+              onClick={fetchDashboardData}
+              style={{
+                padding: '10px 20px',
+                background: '#f1f5f9',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
               }}
             >
-              <Tab label="Overview" icon={<Assessment />} iconPosition="start" />
-              <Tab label="Content" icon={<ContentPaste />} iconPosition="start" />
-              <Tab label="Bulk Upload" icon={<CloudUpload />} iconPosition="start" />
-              <Tab label="Analytics" icon={<Analytics />} iconPosition="start" />
-            </Tabs>
-          </Box>
+              🔄 Refresh
+            </button>
+            <button
+              onClick={() => setUploadDialogOpen(true)}
+              style={{
+                padding: '10px 20px',
+                background: '#3b82f6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              📤 Upload Content
+            </button>
+          </div>
+        </div>
+      </div>
 
-          <Box p={4}>
+      {/* Content */}
+      <div style={{
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: '24px'
+      }}>
+        {/* Stats Cards */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gap: '24px',
+          marginBottom: '32px'
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '16px',
+            padding: '24px',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            border: '1px solid #e2e8f0'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <p style={{ margin: '0 0 8px 0', color: '#64748b', fontSize: '14px' }}>Total Followers</p>
+                <h3 style={{ margin: 0, fontSize: '32px', fontWeight: '700', color: '#1e293b' }}>
+                  {dashboardData.followers_count || 0}
+                </h3>
+                <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#10b981' }}>+12% this month</p>
+              </div>
+              <div style={{ fontSize: '48px', opacity: 0.6 }}>👥</div>
+            </div>
+          </div>
+
+          <div style={{
+            background: 'white',
+            borderRadius: '16px',
+            padding: '24px',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            border: '1px solid #e2e8f0'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <p style={{ margin: '0 0 8px 0', color: '#64748b', fontSize: '14px' }}>Total Views</p>
+                <h3 style={{ margin: 0, fontSize: '32px', fontWeight: '700', color: '#1e293b' }}>
+                  {dashboardData.content_performance?.total_views || 0}
+                </h3>
+                <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#10b981' }}>+8% this week</p>
+              </div>
+              <div style={{ fontSize: '48px', opacity: 0.6 }}>👁️</div>
+            </div>
+          </div>
+
+          <div style={{
+            background: 'white',
+            borderRadius: '16px',
+            padding: '24px',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            border: '1px solid #e2e8f0'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <p style={{ margin: '0 0 8px 0', color: '#64748b', fontSize: '14px' }}>Total Likes</p>
+                <h3 style={{ margin: 0, fontSize: '32px', fontWeight: '700', color: '#1e293b' }}>
+                  {dashboardData.content_performance?.total_likes || 0}
+                </h3>
+                <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#10b981' }}>+15% this month</p>
+              </div>
+              <div style={{ fontSize: '48px', opacity: 0.6 }}>❤️</div>
+            </div>
+          </div>
+
+          <div style={{
+            background: 'white',
+            borderRadius: '16px',
+            padding: '24px',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            border: '1px solid #e2e8f0'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <p style={{ margin: '0 0 8px 0', color: '#64748b', fontSize: '14px' }}>Engagement Rate</p>
+                <h3 style={{ margin: 0, fontSize: '32px', fontWeight: '700', color: '#1e293b' }}>
+                  {dashboardData.content_performance?.average_engagement_rate || 0}%
+                </h3>
+                <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#10b981' }}>+5% this week</p>
+              </div>
+              <div style={{ fontSize: '48px', opacity: 0.6 }}>📈</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tab Navigation */}
+        <div style={{
+          background: 'white',
+          borderRadius: '16px',
+          marginBottom: '24px',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+          border: '1px solid #e2e8f0',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            display: 'flex',
+            borderBottom: '1px solid #e2e8f0'
+          }}>
+            {[
+              { id: 0, label: 'Overview', icon: '📊' },
+              { id: 1, label: 'Content', icon: '📝' },
+              { id: 2, label: 'Bulk Upload', icon: '📤' },
+              { id: 3, label: 'Analytics', icon: '📈' }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                style={{
+                  flex: 1,
+                  padding: '16px 20px',
+                  background: activeTab === tab.id ? '#f8fafc' : 'transparent',
+                  border: 'none',
+                  borderBottom: activeTab === tab.id ? '2px solid #3b82f6' : '2px solid transparent',
+                  color: activeTab === tab.id ? '#3b82f6' : '#64748b',
+                  fontWeight: activeTab === tab.id ? '600' : '400',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  fontSize: '16px'
+                }}
+              >
+                <span>{tab.icon}</span>
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab Content */}
+          <div style={{ padding: '32px' }}>
             {/* Overview Tab */}
             {activeTab === 0 && (
-              <Grid container spacing={4}>
-                <Grid item xs={12} lg={8}>
-                  <Card sx={{ borderRadius: 3, p: 3 }}>
-                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
-                      Content Performance Trends
-                    </Typography>
-                    <ResponsiveContainer width="100%" height={400}>
-                      <LineChart data={dashboardData.analytics?.content_performance || []}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                        <XAxis dataKey="created_at__date" stroke="#666" />
-                        <YAxis stroke="#666" />
-                        <RechartsTooltip 
-                          contentStyle={{ 
-                            borderRadius: 8, 
-                            border: 'none', 
-                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)' 
-                          }}
-                        />
-                        <Line 
-                          type="monotone" 
-                          dataKey="total_views" 
-                          stroke="#667eea" 
-                          strokeWidth={3}
-                          dot={{ fill: '#667eea', strokeWidth: 2, r: 4 }}
-                        />
-                        <Line 
-                          type="monotone" 
-                          dataKey="total_likes" 
-                          stroke="#f093fb" 
-                          strokeWidth={3}
-                          dot={{ fill: '#f093fb', strokeWidth: 2, r: 4 }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </Card>
-                </Grid>
-
-                <Grid item xs={12} lg={4}>
-                  <Card sx={{ borderRadius: 3, p: 3 }}>
-                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
+              <div>
+                <h3 style={{ margin: '0 0 24px 0', fontSize: '20px', fontWeight: '600' }}>
+                  Content Performance Overview
+                </h3>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                  gap: '24px'
+                }}>
+                  <div style={{
+                    background: '#f8fafc',
+                    borderRadius: '12px',
+                    padding: '20px'
+                  }}>
+                    <h4 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: '600' }}>
                       Top Performing Content
-                    </Typography>
-                    <List>
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       {dashboardData.top_performing_content?.slice(0, 5).map((content, index) => (
-                        <ListItem key={content.id} sx={{ px: 0 }}>
-                          <ListItemAvatar>
-                            <Avatar sx={{ 
-                              background: index === 0 ? '#ffd700' : 
-                                        index === 1 ? '#c0c0c0' : 
-                                        index === 2 ? '#cd7f32' : '#667eea',
-                              fontWeight: 600
-                            }}>
-                              {index + 1}
-                            </Avatar>
-                          </ListItemAvatar>
-                          <ListItemText
-                            primary={content.title}
-                            secondary={`${content.views_count} views • ${content.likes_count} likes`}
-                            primaryTypographyProps={{ fontWeight: 600 }}
-                            secondaryTypographyProps={{ color: 'text.secondary' }}
-                          />
-                        </ListItem>
+                        <div key={content.id} style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          padding: '12px',
+                          background: 'white',
+                          borderRadius: '8px'
+                        }}>
+                          <div style={{
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '50%',
+                            background: index === 0 ? '#ffd700' : 
+                                       index === 1 ? '#c0c0c0' : 
+                                       index === 2 ? '#cd7f32' : '#3b82f6',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontWeight: '600',
+                            fontSize: '14px'
+                          }}>
+                            {index + 1}
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <h5 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: '600' }}>
+                              {content.title}
+                            </h5>
+                            <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>
+                              {content.views_count} views • {content.likes_count} likes
+                            </p>
+                          </div>
+                        </div>
                       ))}
-                    </List>
-                  </Card>
-                </Grid>
-              </Grid>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
 
             {/* Content Tab */}
             {activeTab === 1 && (
-              <Box>
-                {/* Search and Filter Bar */}
-                <Box display="flex" gap={2} mb={3} flexWrap="wrap">
-                  <TextField
+              <div>
+                {/* Search and Filter */}
+                <div style={{
+                  display: 'flex',
+                  gap: '16px',
+                  marginBottom: '24px',
+                  flexWrap: 'wrap',
+                  alignItems: 'center'
+                }}>
+                  <input
+                    type="text"
                     placeholder="Search content..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    InputProps={{
-                      startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />
+                    style={{
+                      flex: 1,
+                      minWidth: '300px',
+                      padding: '12px 16px',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      fontSize: '16px'
                     }}
-                    sx={{ minWidth: 300, flexGrow: 1 }}
                   />
-                  <FormControl sx={{ minWidth: 150 }}>
-                    <InputLabel>Category</InputLabel>
-                    <Select
-                      value={filterCategory}
-                      onChange={(e) => setFilterCategory(e.target.value)}
-                      label="Category"
-                    >
-                      <MenuItem value="all">All Categories</MenuItem>
-                      {categories.map((category) => (
-                        <MenuItem key={category.id} value={category.name}>
-                          {category.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={showAudioOnly}
-                        onChange={(e) => setShowAudioOnly(e.target.checked)}
-                      />
-                    }
-                    label="Audio Only"
-                  />
-                </Box>
+                  <select
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                    style={{
+                      padding: '12px 16px',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      minWidth: '150px'
+                    }}
+                  >
+                    <option value="all">All Categories</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.name}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input
+                      type="checkbox"
+                      checked={showAudioOnly}
+                      onChange={(e) => setShowAudioOnly(e.target.checked)}
+                    />
+                    Audio Only
+                  </label>
+                </div>
 
                 {/* Content Grid */}
-                <Grid container spacing={3}>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+                  gap: '24px'
+                }}>
                   {filteredContent.map((content) => (
-                    <Grid item xs={12} md={6} lg={4} key={content.id}>
-                      <Card sx={{ 
-                        borderRadius: 3, 
-                        height: '100%',
-                        transition: 'transform 0.2s, box-shadow 0.2s',
-                        '&:hover': {
-                          transform: 'translateY(-4px)',
-                          boxShadow: '0 12px 40px rgba(0,0,0,0.15)'
-                        }
+                    <div key={content.id} style={{
+                      background: 'white',
+                      borderRadius: '12px',
+                      padding: '20px',
+                      border: '1px solid #e2e8f0',
+                      transition: 'transform 0.2s, box-shadow 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = 'none';
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                        <h4 style={{ margin: 0, fontSize: '18px', fontWeight: '600', flex: 1 }}>
+                          {content.title}
+                        </h4>
+                        <button style={{ background: 'none', border: 'none', fontSize: '16px', cursor: 'pointer' }}>
+                          ⋮
+                        </button>
+                      </div>
+                      
+                      <p style={{
+                        margin: '0 0 16px 0',
+                        fontSize: '14px',
+                        color: '#64748b',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden'
                       }}>
-                        <CardContent>
-                          <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
-                            <Typography variant="h6" sx={{ fontWeight: 600, flex: 1 }}>
-                              {content.title}
-                            </Typography>
-                            <IconButton size="small">
-                              <MoreVert />
-                            </IconButton>
-                          </Box>
-                          
-                          <Typography variant="body2" color="text.secondary" mb={2} sx={{ 
-                            display: '-webkit-box',
-                            WebkitLineClamp: 3,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden'
+                        {content.description}
+                      </p>
+
+                      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
+                        <span style={{
+                          padding: '4px 8px',
+                          background: '#f1f5f9',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          color: '#475569'
+                        }}>
+                          👁️ {content.views_count} views
+                        </span>
+                        <span style={{
+                          padding: '4px 8px',
+                          background: '#f1f5f9',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          color: '#475569'
+                        }}>
+                          ❤️ {content.likes_count} likes
+                        </span>
+                        <span style={{
+                          padding: '4px 8px',
+                          background: '#f1f5f9',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          color: '#475569'
+                        }}>
+                          ⭐ {content.average_rating || 0} stars
+                        </span>
+                        {content.audio_file && (
+                          <span style={{
+                            padding: '4px 8px',
+                            background: '#dcfce7',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            color: '#166534'
                           }}>
-                            {content.description}
-                          </Typography>
+                            🔊 Audio
+                          </span>
+                        )}
+                      </div>
 
-                          <Box display="flex" gap={1} mb={2} flexWrap="wrap">
-                            <Chip 
-                              icon={<Visibility />} 
-                              label={`${content.views_count} views`} 
-                              size="small" 
-                              variant="outlined"
-                            />
-                            <Chip 
-                              icon={<ThumbUp />} 
-                              label={`${content.likes_count} likes`} 
-                              size="small" 
-                              variant="outlined"
-                            />
-                            <Chip 
-                              icon={<Star />} 
-                              label={`${content.average_rating || 0} stars`} 
-                              size="small" 
-                              variant="outlined"
-                            />
-                            {content.audio_file && (
-                              <Chip 
-                                icon={<VolumeUp />} 
-                                label="Audio" 
-                                size="small" 
-                                color="success"
-                              />
-                            )}
-                          </Box>
-
-                          <Box display="flex" gap={1} justifyContent="space-between">
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              startIcon={<Edit />}
-                              sx={{ borderRadius: 2 }}
-                            >
-                              Edit
-                            </Button>
-                            {!content.audio_file && (
-                              <Button
-                                size="small"
-                                variant="contained"
-                                startIcon={processingAudio[content.id] ? <CircularProgress size={16} /> : <Mic />}
-                                onClick={() => generateAudioForContent(content.id, content.title)}
-                                disabled={processingAudio[content.id]}
-                                sx={{ 
-                                  borderRadius: 2,
-                                  background: 'linear-gradient(45deg, #667eea, #764ba2)',
-                                  '&:hover': {
-                                    background: 'linear-gradient(45deg, #5a6fd8, #6a4190)'
-                                  }
-                                }}
-                              >
-                                {processingAudio[content.id] ? 'Generating...' : 'Generate Audio'}
-                              </Button>
-                            )}
-                                                         {content.audio_file && (
-                               <Button
-                                 size="small"
-                                 variant="contained"
-                                 startIcon={
-                                   audioLoading[content.id] ? <CircularProgress size={16} /> :
-                                   currentlyPlaying === content.id ? <Pause /> : <PlayArrow />
-                                 }
-                                 onClick={() => {
-                                   if (currentlyPlaying === content.id) {
-                                     pauseAudio();
-                                   } else {
-                                     playAudio(content.id, content.audio_file);
-                                   }
-                                 }}
-                                 sx={{ 
-                                   borderRadius: 2,
-                                   background: currentlyPlaying === content.id 
-                                     ? 'linear-gradient(45deg, #ff6b6b, #ee5a52)' 
-                                     : 'linear-gradient(45deg, #43e97b, #38f9d7)',
-                                   '&:hover': {
-                                     background: currentlyPlaying === content.id 
-                                       ? 'linear-gradient(45deg, #ff5252, #d32f2f)' 
-                                       : 'linear-gradient(45deg, #3dd870, #2ee6c4)'
-                                   }
-                                 }}
-                               >
-                                 {audioLoading[content.id] ? 'Loading...' :
-                                  currentlyPlaying === content.id ? 'Pause' : 'Play Audio'}
-                               </Button>
-                             )}
-                          </Box>
-                        </CardContent>
-                      </Card>
-                    </Grid>
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between' }}>
+                        <button style={{
+                          padding: '8px 16px',
+                          background: '#f1f5f9',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '14px'
+                        }}>
+                          ✏️ Edit
+                        </button>
+                        {!content.audio_file && (
+                          <button
+                            onClick={() => generateAudioForContent(content.id, content.title)}
+                            disabled={processingAudio[content.id]}
+                            style={{
+                              padding: '8px 16px',
+                              background: processingAudio[content.id] ? '#94a3b8' : '#3b82f6',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '6px',
+                              cursor: processingAudio[content.id] ? 'not-allowed' : 'pointer',
+                              fontSize: '14px'
+                            }}
+                          >
+                            {processingAudio[content.id] ? '⏳ Generating...' : '🎤 Generate Audio'}
+                          </button>
+                        )}
+                        {content.audio_file && (
+                          <button
+                            onClick={() => {
+                              if (currentlyPlaying === content.id) {
+                                pauseAudio();
+                              } else {
+                                playAudio(content.id, content.audio_file);
+                              }
+                            }}
+                            style={{
+                              padding: '8px 16px',
+                              background: currentlyPlaying === content.id ? '#ef4444' : '#10b981',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontSize: '14px'
+                            }}
+                          >
+                            {audioLoading[content.id] ? '⏳ Loading...' :
+                             currentlyPlaying === content.id ? '⏸️ Pause' : '▶️ Play Audio'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   ))}
-                </Grid>
+                </div>
 
                 {filteredContent.length === 0 && (
-                  <Box textAlign="center" py={8}>
-                    <Typography variant="h6" color="text.secondary" gutterBottom>
-                      No content found
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Try adjusting your search or filter criteria
-                    </Typography>
-                  </Box>
+                  <div style={{
+                    textAlign: 'center',
+                    padding: '60px 20px',
+                    color: '#64748b'
+                  }}>
+                    <div style={{ fontSize: '64px', marginBottom: '16px' }}>📝</div>
+                    <h3 style={{ margin: '0 0 8px 0', color: '#374151' }}>No content found</h3>
+                    <p style={{ margin: 0 }}>Try adjusting your search or filter criteria</p>
+                  </div>
                 )}
-              </Box>
+              </div>
             )}
 
             {/* Bulk Upload Tab */}
             {activeTab === 2 && (
-              <Box>
-                <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                  <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '600' }}>
                     Bulk PDF Uploads
-                  </Typography>
-                  <Button 
-                    variant="contained" 
-                    startIcon={<CloudUpload />}
+                  </h3>
+                  <button
                     onClick={() => setUploadDialogOpen(true)}
-                    sx={{ 
-                      borderRadius: 2,
-                      background: 'linear-gradient(45deg, #667eea, #764ba2)',
-                      '&:hover': {
-                        background: 'linear-gradient(45deg, #5a6fd8, #6a4190)'
-                      }
+                    style={{
+                      padding: '12px 24px',
+                      background: '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
                     }}
                   >
-                    Upload PDF
-                  </Button>
-                </Box>
+                    📤 Upload PDF
+                  </button>
+                </div>
 
-                <Grid container spacing={3}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   {bulkUploads.map((upload) => (
-                    <Grid item xs={12} key={upload.id}>
-                      <Card sx={{ borderRadius: 3, p: 3 }}>
-                        <Box display="flex" justifyContent="space-between" alignItems="flex-start">
-                          <Box flex={1}>
-                            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                              {upload.title}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" mb={2}>
-                              {upload.description}
-                            </Typography>
-                            <Box display="flex" gap={2} alignItems="center" mb={2} flexWrap="wrap">
-                              <Chip 
-                                icon={getStatusIcon(upload.status)}
-                                label={upload.status}
-                                color={getStatusColor(upload.status)}
-                                size="small"
-                              />
-                              <Typography variant="body2">
-                                {upload.file_size_mb} MB • {upload.page_count || 0} pages
-                              </Typography>
-                            </Box>
-                            {upload.status === 'processing' && (
-                              <Box>
-                                <Typography variant="body2" mb={1}>
-                                  Processing: {upload.progress}%
-                                </Typography>
-                                <LinearProgress 
-                                  variant="determinate" 
-                                  value={upload.progress} 
-                                  sx={{ borderRadius: 2, height: 8 }}
-                                />
-                              </Box>
-                            )}
-                            {upload.status === 'completed' && (
-                              <Typography variant="body2" color="success.main" sx={{ fontWeight: 600 }}>
-                                ✓ Processed {upload.processed_content_count} content pieces
-                              </Typography>
-                            )}
-                            {upload.status === 'failed' && (
-                              <Typography variant="body2" color="error.main">
-                                ❌ {upload.error_message}
-                              </Typography>
-                            )}
-                          </Box>
-                        </Box>
-                      </Card>
-                    </Grid>
+                    <div key={upload.id} style={{
+                      background: 'white',
+                      borderRadius: '12px',
+                      padding: '24px',
+                      border: '1px solid #e2e8f0'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div style={{ flex: 1 }}>
+                          <h4 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: '600' }}>
+                            {upload.title}
+                          </h4>
+                          <p style={{ margin: '0 0 16px 0', fontSize: '14px', color: '#64748b' }}>
+                            {upload.description}
+                          </p>
+                          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap' }}>
+                            <span style={{
+                              padding: '6px 12px',
+                              background: getStatusColor(upload.status),
+                              color: 'white',
+                              borderRadius: '6px',
+                              fontSize: '12px',
+                              fontWeight: '600',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}>
+                              {getStatusIcon(upload.status)} {upload.status}
+                            </span>
+                            <span style={{ fontSize: '14px', color: '#64748b' }}>
+                              {upload.file_size_mb} MB • {upload.page_count || 0} pages
+                            </span>
+                          </div>
+                          {upload.status === 'processing' && (
+                            <div style={{ marginBottom: '12px' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                <span style={{ fontSize: '14px', color: '#64748b' }}>Processing Progress</span>
+                                <span style={{ fontSize: '14px', fontWeight: '600' }}>{upload.progress}%</span>
+                              </div>
+                              <div style={{
+                                width: '100%',
+                                height: '8px',
+                                background: '#e2e8f0',
+                                borderRadius: '4px',
+                                overflow: 'hidden'
+                              }}>
+                                <div style={{
+                                  width: `${upload.progress}%`,
+                                  height: '100%',
+                                  background: '#3b82f6',
+                                  transition: 'width 0.3s ease'
+                                }}></div>
+                              </div>
+                            </div>
+                          )}
+                          {upload.status === 'completed' && (
+                            <p style={{ margin: 0, fontSize: '14px', color: '#10b981', fontWeight: '600' }}>
+                              ✅ Processed {upload.processed_content_count} content pieces
+                            </p>
+                          )}
+                          {upload.status === 'failed' && (
+                            <p style={{ margin: 0, fontSize: '14px', color: '#ef4444' }}>
+                              ❌ {upload.error_message}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   ))}
-                </Grid>
+                </div>
 
                 {bulkUploads.length === 0 && (
-                  <Box textAlign="center" py={8}>
-                    <CloudUpload sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-                    <Typography variant="h6" color="text.secondary" gutterBottom>
-                      No bulk uploads yet
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" mb={3}>
-                      Upload your first PDF to start bulk processing
-                    </Typography>
-                    <Button 
-                      variant="contained" 
-                      startIcon={<CloudUpload />}
+                  <div style={{
+                    textAlign: 'center',
+                    padding: '60px 20px',
+                    color: '#64748b'
+                  }}>
+                    <div style={{ fontSize: '64px', marginBottom: '16px' }}>📤</div>
+                    <h3 style={{ margin: '0 0 8px 0', color: '#374151' }}>No bulk uploads yet</h3>
+                    <p style={{ margin: '0 0 24px 0' }}>Upload your first PDF to start bulk processing</p>
+                    <button
                       onClick={() => setUploadDialogOpen(true)}
-                      sx={{ 
-                        borderRadius: 2,
-                        background: 'linear-gradient(45deg, #667eea, #764ba2)',
-                        '&:hover': {
-                          background: 'linear-gradient(45deg, #5a6fd8, #6a4190)'
-                        }
+                      style={{
+                        padding: '12px 24px',
+                        background: '#3b82f6',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer'
                       }}
                     >
-                      Upload Your First PDF
-                    </Button>
-                  </Box>
+                      📤 Upload Your First PDF
+                    </button>
+                  </div>
                 )}
-              </Box>
+              </div>
             )}
 
             {/* Analytics Tab */}
             {activeTab === 3 && (
-              <Grid container spacing={4}>
-                <Grid item xs={12} md={6}>
-                  <Card sx={{ borderRadius: 3, p: 3 }}>
-                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
-                      Follower Growth
-                    </Typography>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <RechartsBarChart data={[
-                        { period: 'Today', growth: dashboardData.follower_growth?.today || 0 },
-                        { period: 'This Week', growth: dashboardData.follower_growth?.this_week || 0 },
-                        { period: 'This Month', growth: dashboardData.follower_growth?.this_month || 0 }
-                      ]}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                        <XAxis dataKey="period" stroke="#666" />
-                        <YAxis stroke="#666" />
-                        <RechartsTooltip 
-                          contentStyle={{ 
-                            borderRadius: 8, 
-                            border: 'none', 
-                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)' 
-                          }}
-                        />
-                        <Bar 
-                          dataKey="growth" 
-                          fill="url(#colorGradient)"
-                          radius={[4, 4, 0, 0]}
-                        />
-                      </RechartsBarChart>
-                    </ResponsiveContainer>
-                  </Card>
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <Card sx={{ borderRadius: 3, p: 3 }}>
-                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
+              <div>
+                <h3 style={{ margin: '0 0 24px 0', fontSize: '20px', fontWeight: '600' }}>
+                  Analytics Overview
+                </h3>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                  gap: '24px'
+                }}>
+                  <div style={{
+                    background: '#f8fafc',
+                    borderRadius: '12px',
+                    padding: '20px'
+                  }}>
+                    <h4 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: '600' }}>
                       Content Analytics
-                    </Typography>
-                    <List>
-                      <ListItem sx={{ px: 0 }}>
-                        <ListItemAvatar>
-                          <Avatar sx={{ background: 'linear-gradient(45deg, #667eea, #764ba2)' }}>
-                            <ContentPaste />
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary="Total Content"
-                          secondary={dashboardData.content_performance?.total_content || 0}
-                          primaryTypographyProps={{ fontWeight: 600 }}
-                        />
-                      </ListItem>
-                      <Divider />
-                      <ListItem sx={{ px: 0 }}>
-                        <ListItemAvatar>
-                          <Avatar sx={{ background: 'linear-gradient(45deg, #f093fb, #f5576c)' }}>
-                            <Speed />
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary="Average Listen Time"
-                          secondary={`${Math.round((dashboardData.content_performance?.average_listen_time || 0) / 60)} minutes`}
-                          primaryTypographyProps={{ fontWeight: 600 }}
-                        />
-                      </ListItem>
-                      <Divider />
-                      <ListItem sx={{ px: 0 }}>
-                        <ListItemAvatar>
-                          <Avatar sx={{ background: 'linear-gradient(45deg, #4facfe, #00f2fe)' }}>
-                            <Star />
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary="Average Rating"
-                          secondary={`${dashboardData.analytics?.average_rating || 0} stars`}
-                          primaryTypographyProps={{ fontWeight: 600 }}
-                        />
-                      </ListItem>
-                    </List>
-                  </Card>
-                </Grid>
-              </Grid>
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          background: '#3b82f6',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '20px'
+                        }}>
+                          📝
+                        </div>
+                        <div>
+                          <h5 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: '600' }}>Total Content</h5>
+                          <p style={{ margin: 0, fontSize: '24px', fontWeight: '700' }}>
+                            {dashboardData.content_performance?.total_content || 0}
+                          </p>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          background: '#10b981',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '20px'
+                        }}>
+                          ⭐
+                        </div>
+                        <div>
+                          <h5 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: '600' }}>Average Rating</h5>
+                          <p style={{ margin: 0, fontSize: '24px', fontWeight: '700' }}>
+                            {dashboardData.analytics?.average_rating || 0} stars
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
-          </Box>
-        </Card>
+          </div>
+        </div>
+      </div>
 
-        {/* Floating Action Button */}
-        <Tooltip title="Quick Upload" placement="left">
-          <Fab
-            color="primary"
-            aria-label="upload"
-            onClick={() => setUploadDialogOpen(true)}
-            sx={{
-              position: 'fixed',
-              bottom: 24,
-              right: 24,
-              background: 'linear-gradient(45deg, #667eea, #764ba2)',
-              '&:hover': {
-                background: 'linear-gradient(45deg, #5a6fd8, #6a4190)'
-              }
-            }}
-          >
-            <Add />
-          </Fab>
-        </Tooltip>
+      {/* Upload Modal */}
+      {uploadDialogOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '16px',
+            padding: '32px',
+            width: '90%',
+            maxWidth: '500px',
+            maxHeight: '80vh',
+            overflow: 'auto'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '600' }}>Upload PDF for Bulk Processing</h3>
+              <button 
+                onClick={() => setUploadDialogOpen(false)}
+                style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}
+              >
+                ×
+              </button>
+            </div>
 
-        {/* Bulk Upload Dialog */}
-        <Dialog 
-          open={uploadDialogOpen} 
-          onClose={() => setUploadDialogOpen(false)} 
-          maxWidth="sm" 
-          fullWidth
-          PaperProps={{
-            sx: { borderRadius: 3 }
-          }}
-        >
-          <DialogTitle sx={{ fontWeight: 600 }}>
-            Upload PDF for Bulk Processing
-          </DialogTitle>
-          <DialogContent>
-            <Box mt={2}>
-              <TextField
-                fullWidth
-                label="Title"
-                value={uploadForm.title}
-                onChange={(e) => setUploadForm({ ...uploadForm, title: e.target.value })}
-                margin="normal"
-                required
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-              />
-              <TextField
-                fullWidth
-                label="Description"
-                value={uploadForm.description}
-                onChange={(e) => setUploadForm({ ...uploadForm, description: e.target.value })}
-                margin="normal"
-                multiline
-                rows={3}
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-              />
-              <FormControl fullWidth margin="normal">
-                <InputLabel>Category</InputLabel>
-                <Select
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Title *</label>
+                <input
+                  type="text"
+                  value={uploadForm.title}
+                  onChange={(e) => setUploadForm({ ...uploadForm, title: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    fontSize: '16px'
+                  }}
+                  required
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Description</label>
+                <textarea
+                  value={uploadForm.description}
+                  onChange={(e) => setUploadForm({ ...uploadForm, description: e.target.value })}
+                  rows={3}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    resize: 'vertical'
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Category</label>
+                <select
                   value={uploadForm.category}
                   onChange={(e) => setUploadForm({ ...uploadForm, category: e.target.value })}
-                  label="Category"
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    fontSize: '16px'
+                  }}
                 >
+                  <option value="">Select Category</option>
                   {Array.isArray(categories) && categories.map((category) => (
-                    <MenuItem key={category.id} value={category.id}>
+                    <option key={category.id} value={category.id}>
                       {category.name}
-                    </MenuItem>
+                    </option>
                   ))}
-                </Select>
-              </FormControl>
-              <Box mt={3}>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>PDF File *</label>
                 <input
-                  accept=".pdf"
-                  style={{ display: 'none' }}
-                  id="pdf-file-input"
                   type="file"
+                  accept=".pdf"
                   onChange={(e) => setUploadForm({ ...uploadForm, pdf_file: e.target.files[0] })}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '2px dashed #e2e8f0',
+                    borderRadius: '8px',
+                    fontSize: '16px'
+                  }}
                 />
-                <label htmlFor="pdf-file-input">
-                  <Button 
-                    variant="outlined" 
-                    component="span" 
-                    startIcon={<CloudUpload />}
-                    fullWidth
-                    sx={{ 
-                      borderRadius: 2, 
-                      py: 2,
-                      borderStyle: 'dashed',
-                      borderWidth: 2
-                    }}
-                  >
-                    Choose PDF File
-                  </Button>
-                </label>
                 {uploadForm.pdf_file && (
-                  <Typography variant="body2" mt={1} color="success.main" sx={{ fontWeight: 600 }}>
-                    ✓ Selected: {uploadForm.pdf_file.name}
-                  </Typography>
+                  <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#10b981', fontWeight: '600' }}>
+                    ✅ Selected: {uploadForm.pdf_file.name}
+                  </p>
                 )}
-              </Box>
-            </Box>
-          </DialogContent>
-          <DialogActions sx={{ p: 3 }}>
-            <Button 
-              onClick={() => setUploadDialogOpen(false)}
-              sx={{ borderRadius: 2 }}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleFileUpload} 
-              variant="contained" 
-              disabled={uploading || !uploadForm.title || !uploadForm.pdf_file}
-              sx={{ 
-                borderRadius: 2,
-                background: 'linear-gradient(45deg, #667eea, #764ba2)',
-                '&:hover': {
-                  background: 'linear-gradient(45deg, #5a6fd8, #6a4190)'
-                }
-              }}
-            >
-              {uploading ? <CircularProgress size={20} /> : 'Upload & Process'}
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </Container>
-    </Box>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px' }}>
+              <button
+                onClick={() => setUploadDialogOpen(false)}
+                style={{
+                  padding: '12px 24px',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  background: 'white',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleFileUpload}
+                disabled={uploading || !uploadForm.title || !uploadForm.pdf_file}
+                style={{
+                  padding: '12px 24px',
+                  background: (uploading || !uploadForm.title || !uploadForm.pdf_file) ? '#94a3b8' : '#3b82f6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: (uploading || !uploadForm.title || !uploadForm.pdf_file) ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {uploading ? '⏳ Uploading...' : '📤 Upload & Process'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CSS Animation */}
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
   );
 };
 

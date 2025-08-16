@@ -11,6 +11,237 @@ import { Link } from 'react-router-dom';
 // API configuration
 const API_BASE = 'http://localhost:8000/api/social';
 
+// Content Card Component
+const ContentCard = ({ content }) => {
+  const [audioPlayer, setAudioPlayer] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [audioLoading, setAudioLoading] = useState(false);
+
+  const playAudio = async (audioFile) => {
+    try {
+      setAudioLoading(true);
+      
+      if (audioPlayer) {
+        audioPlayer.pause();
+        audioPlayer.currentTime = 0;
+      }
+      
+      let audioUrl;
+      if (audioFile.startsWith('/media/')) {
+        audioUrl = `http://localhost:8000${audioFile}`;
+      } else if (audioFile.startsWith('media/')) {
+        audioUrl = `http://localhost:8000/${audioFile}`;
+      } else {
+        audioUrl = `http://localhost:8000/media/${audioFile}`;
+      }
+      
+      const audio = new Audio(audioUrl);
+      
+      audio.addEventListener('canplay', () => {
+        setAudioLoading(false);
+      });
+      
+      audio.addEventListener('play', () => {
+        setIsPlaying(true);
+      });
+      
+      audio.addEventListener('pause', () => {
+        setIsPlaying(false);
+      });
+      
+      audio.addEventListener('ended', () => {
+        setIsPlaying(false);
+      });
+      
+      audio.addEventListener('error', (e) => {
+        console.error('Audio error:', e);
+        toast.error('Error playing audio');
+        setAudioLoading(false);
+      });
+      
+      await audio.play();
+      setAudioPlayer(audio);
+      
+    } catch (error) {
+      console.error('Error playing audio:', error);
+      toast.error('Error playing audio');
+      setAudioLoading(false);
+    }
+  };
+
+  const pauseAudio = () => {
+    if (audioPlayer) {
+      audioPlayer.pause();
+      setIsPlaying(false);
+    }
+  };
+
+  return (
+    <div style={{
+      background: 'white',
+      borderRadius: '16px',
+      padding: '24px',
+      marginBottom: '24px',
+      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+      border: '1px solid #e2e8f0'
+    }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        marginBottom: '16px'
+      }}>
+        <img
+          src={content.creator?.avatar_url || `https://ui-avatars.com/api/?name=${content.creator?.first_name}+${content.creator?.last_name}&background=6366f1&color=fff&size=40`}
+          alt="Creator"
+          style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            objectFit: 'cover'
+          }}
+        />
+        <div style={{ flex: 1 }}>
+          <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: '600' }}>
+            {content.creator?.first_name} {content.creator?.last_name}
+          </h4>
+          <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>
+            @{content.creator?.username} • {new Date(content.created_at).toLocaleDateString()}
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <span style={{
+            padding: '4px 8px',
+            background: '#f1f5f9',
+            borderRadius: '6px',
+            fontSize: '12px',
+            color: '#475569'
+          }}>
+            🎵 Audio Content
+          </span>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div style={{ marginBottom: '16px' }}>
+        <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: '600' }}>
+          {content.title}
+        </h3>
+        <p style={{
+          margin: '0 0 12px 0',
+          fontSize: '14px',
+          color: '#64748b',
+          lineHeight: '1.5'
+        }}>
+          {content.description}
+        </p>
+        
+        {/* Audio Player */}
+        {content.audio_file && (
+          <div style={{
+            background: '#f8fafc',
+            borderRadius: '12px',
+            padding: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px'
+          }}>
+            <button
+              onClick={() => {
+                if (isPlaying) {
+                  pauseAudio();
+                } else {
+                  playAudio(content.audio_file);
+                }
+              }}
+              style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '50%',
+                background: isPlaying ? '#ef4444' : '#3b82f6',
+                color: 'white',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '18px'
+              }}
+            >
+              {audioLoading ? '⏳' : isPlaying ? '⏸️' : '▶️'}
+            </button>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '4px' }}>
+                {content.title}
+              </div>
+              <div style={{ fontSize: '12px', color: '#64748b' }}>
+                {audioLoading ? 'Loading...' : isPlaying ? 'Now Playing' : 'Click to play'}
+              </div>
+            </div>
+            <div style={{ fontSize: '24px' }}>🎧</div>
+          </div>
+        )}
+      </div>
+
+      {/* Stats and Actions */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingTop: '16px',
+        borderTop: '1px solid #f1f5f9'
+      }}>
+        <div style={{ display: 'flex', gap: '16px' }}>
+          <span style={{ fontSize: '14px', color: '#64748b' }}>
+            👁️ {content.views_count || 0} views
+          </span>
+          <span style={{ fontSize: '14px', color: '#64748b' }}>
+            ❤️ {content.likes_count || 0} likes
+          </span>
+          {content.average_rating && (
+            <span style={{ fontSize: '14px', color: '#64748b' }}>
+              ⭐ {content.average_rating} stars
+            </span>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button style={{
+            padding: '6px 12px',
+            background: 'transparent',
+            border: '1px solid #e2e8f0',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '14px'
+          }}>
+            ❤️ Like
+          </button>
+          <button style={{
+            padding: '6px 12px',
+            background: 'transparent',
+            border: '1px solid #e2e8f0',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '14px'
+          }}>
+            💬 Comment
+          </button>
+          <button style={{
+            padding: '6px 12px',
+            background: 'transparent',
+            border: '1px solid #e2e8f0',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '14px'
+          }}>
+            📤 Share
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const api = {
   getFeed: async () => {
     try {
@@ -27,6 +258,49 @@ const api = {
       throw new Error(`HTTP ${response.status}`);
     } catch (error) {
       console.error('Error fetching feed:', error);
+      return [];
+    }
+  },
+
+  getContent: async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      console.log('Fetching content with token:', token ? 'Token exists' : 'No token');
+      
+      // First, test the content endpoint
+      const testResponse = await fetch(`http://localhost:8000/api/content/test/`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (testResponse.ok) {
+        const testData = await testResponse.json();
+        console.log('Test endpoint response:', testData);
+      }
+      
+      const response = await fetch(`http://localhost:8000/api/content/`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      console.log('Content API response status:', response.status);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Content API response data:', data);
+        console.log('Content count:', data.length);
+        return data;
+      }
+      
+      const errorText = await response.text();
+      console.error('Content API error response:', errorText);
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
+    } catch (error) {
+      console.error('Error fetching content:', error);
       return [];
     }
   },
@@ -95,12 +369,24 @@ const Dashboard = ({ setIsAuthenticated }) => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [content, setContent] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [showContent, setShowContent] = useState(false); // Toggle between posts and content
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
+  const [uploadForm, setUploadForm] = useState({
+    title: '',
+    description: '',
+    category: '',
+    pdf_file: null
+  });
+  const [categories, setCategories] = useState([]);
+  const [uploading, setUploading] = useState(false);
   useEffect(() => {
     initializeDashboard();
+    fetchCategories();
   }, []);
 
   const initializeDashboard = async () => {
@@ -110,9 +396,15 @@ const Dashboard = ({ setIsAuthenticated }) => {
       setUser(updatedProfile);
       localStorage.setItem('user_data', JSON.stringify(updatedProfile));
       
-      // Load feed
-      const feedData = await api.getFeed();
+      // Load feed and content
+      const [feedData, contentData] = await Promise.all([
+        api.getFeed(),
+        api.getContent()
+      ]);
+      console.log('Setting posts:', feedData);
+      console.log('Setting content:', contentData);
       setPosts(feedData);
+      setContent(contentData);
     } catch (error) {
       console.error('Error initializing dashboard:', error);
       toast.error('Failed to load dashboard');
@@ -228,6 +520,69 @@ const Dashboard = ({ setIsAuthenticated }) => {
     toast.success('Logged out successfully!');
   };
 
+  const fetchCategories = async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`http://localhost:8000/api/content/categories/`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setCategories(Array.isArray(data) ? data : []);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      setCategories([]);
+    }
+  };
+
+  const handleFileUpload = async () => {
+    if (!uploadForm.title || !uploadForm.pdf_file) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const token = localStorage.getItem('access_token');
+      const formData = new FormData();
+      formData.append('title', uploadForm.title);
+      formData.append('description', uploadForm.description);
+      formData.append('category', uploadForm.category);
+      formData.append('pdf_file', uploadForm.pdf_file);
+
+      const response = await fetch(`http://localhost:8000/api/content/creator/bulk-upload/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData
+      });
+
+      if (response.ok) {
+        toast.success('Bulk upload started successfully!');
+        setShowBulkUpload(false);
+        setUploadForm({ title: '', description: '', category: '', pdf_file: null });
+        // Refresh content after upload
+        setTimeout(() => {
+          initializeDashboard();
+        }, 2000);
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Failed to start bulk upload');
+      }
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast.error('Error uploading file');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (!user) {
     return (
       <div style={{
@@ -271,7 +626,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
               </div>
             </div>
             <div className="user-menu">
-              <button className="notification-btn">🔔</button>
+              {/* <button className="notification-btn">🔔</button> */}
               <div className="user-profile">
                 <img
                   src={user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=6366f1&color=fff&size=40`}
@@ -332,7 +687,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
   { id: 'profile', icon: '👤', label: 'My Profile' },
   { id: 'creator-dashboard', icon: '📊', label: 'Creator Dashboard' },
   { id: 'messages', icon: '💬', label: 'Messages' },
-  { id: 'notifications', icon: '🔔', label: 'Notifications' },
+  // { id: 'notifications', icon: '🔔', label: 'Notifications' },
   { id: 'settings', icon: '⚙️', label: 'Settings' },
 ].map((item) => (
   <button
@@ -394,14 +749,53 @@ const Dashboard = ({ setIsAuthenticated }) => {
                     <span className="action-label">Photo</span>
                   </button>
                   <button 
-                    className="action-btn ai"
-                    onClick={() => setShowCreatePost(true)}
+                    className="action-btn"
+                    onClick={() => setShowBulkUpload(true)}
                   >
-                    <span className="action-icon">🔗</span>
-                    <span className="action-label">Link</span>
+                    <span className="action-icon">📤</span>
+                    <span className="action-label">Upload PDF</span>
                   </button>
                 </div>
               </div>
+            </div>
+
+            {/* Toggle between Posts and Content */}
+            <div style={{
+              display: 'flex',
+              gap: '12px',
+              marginBottom: '20px',
+              background: 'white',
+              padding: '16px',
+              borderRadius: '12px'
+            }}>
+              <button
+                onClick={() => setShowContent(false)}
+                style={{
+                  padding: '10px 20px',
+                  background: !showContent ? '#3b82f6' : 'transparent',
+                  color: !showContent ? 'white' : '#64748b',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '600'
+                }}
+              >
+                📝 Social Posts
+              </button>
+              <button
+                onClick={() => setShowContent(true)}
+                style={{
+                  padding: '10px 20px',
+                  background: showContent ? '#3b82f6' : 'transparent',
+                  color: showContent ? 'white' : '#64748b',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '600'
+                }}
+              >
+                🎵 Audio Content
+              </button>
             </div>
 
             <div className="content-feed">
@@ -410,36 +804,127 @@ const Dashboard = ({ setIsAuthenticated }) => {
                   <div className="loading-spinner"></div>
                   <span>Loading your feed...</span>
                 </div>
-              ) : posts.length === 0 ? (
-                <div className="empty-content">
-                  <div className="empty-icon">📝</div>
-                  <h3>Your feed is empty</h3>
-                  <p>Follow some people or create your first post to get started!</p>
-                  <button
-                    onClick={() => setShowCreatePost(true)}
-                    style={{
-                      padding: '12px 24px',
-                      background: '#3b82f6',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      marginTop: '16px'
-                    }}
-                  >
-                    Create Your First Post
-                  </button>
-                </div>
+              ) : !showContent ? (
+                // Social Posts
+                posts.length === 0 ? (
+                  <div className="empty-content">
+                    <div className="empty-icon">📝</div>
+                    <h3>Your feed is empty</h3>
+                    <p>Follow some people or create your first post to get started!</p>
+                    <button
+                      onClick={() => setShowCreatePost(true)}
+                      style={{
+                        padding: '12px 24px',
+                        background: '#3b82f6',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        marginTop: '16px'
+                      }}
+                    >
+                      Create Your First Post
+                    </button>
+                  </div>
+                ) : (
+                  posts.map((post) => (
+                    <PostCard 
+                      key={post.id} 
+                      post={post} 
+                      onLike={handleLike}
+                      onFollow={handleFollow}
+                      onCommentAdded={handleCommentAdded}
+                    />
+                  ))
+                )
               ) : (
-                posts.map((post) => (
-                  <PostCard 
-                    key={post.id} 
-                    post={post} 
-                    onLike={handleLike}
-                    onFollow={handleFollow}
-                    onCommentAdded={handleCommentAdded}
-                  />
-                ))
+                // Audio Content
+                console.log('Rendering content section, content length:', content.length),
+                content.length === 0 ? (
+                  <div className="empty-content">
+                    <div className="empty-icon">🎵</div>
+                    <h3>No audio content yet</h3>
+                    <p>Check out the Creator Dashboard to upload some content!</p>
+                    <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+                      <button
+                        onClick={() => navigate('/creator-dashboard')}
+                        style={{
+                          padding: '12px 24px',
+                          background: '#3b82f6',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Go to Creator Dashboard
+                      </button>
+                      <button
+                        onClick={async () => {
+                          try {
+                            const newContent = await api.getContent();
+                            setContent(newContent);
+                            toast.success('Content refreshed!');
+                          } catch (error) {
+                            toast.error('Failed to refresh content');
+                          }
+                        }}
+                        style={{
+                          padding: '12px 24px',
+                          background: '#10b981',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        🔄 Refresh Content
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center', 
+                      marginBottom: '16px',
+                      padding: '0 8px'
+                    }}>
+                      <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600' }}>
+                        Audio Content ({content.length} items)
+                      </h3>
+                      <button
+                        onClick={async () => {
+                          try {
+                            const newContent = await api.getContent();
+                            setContent(newContent);
+                            toast.success('Content refreshed!');
+                          } catch (error) {
+                            toast.error('Failed to refresh content');
+                          }
+                        }}
+                        style={{
+                          padding: '8px 16px',
+                          background: '#10b981',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '14px'
+                        }}
+                      >
+                        🔄 Refresh
+                      </button>
+                    </div>
+                    {content.map((item) => (
+                      <ContentCard 
+                        key={item.id} 
+                        content={item}
+                      />
+                    ))}
+                  </div>
+                )
               )}
             </div>
           </div>
@@ -528,6 +1013,147 @@ const Dashboard = ({ setIsAuthenticated }) => {
         onClose={() => setShowSearch(false)}
         onFollowUpdate={handleFollowUpdate}
       />
+
+      {/* Bulk Upload Modal */}
+      {showBulkUpload && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '16px',
+            padding: '32px',
+            width: '90%',
+            maxWidth: '500px',
+            maxHeight: '80vh',
+            overflow: 'auto'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '600' }}>Upload PDF for Bulk Processing</h3>
+              <button 
+                onClick={() => setShowBulkUpload(false)}
+                style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}
+              >
+                ×
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Title *</label>
+                <input
+                  type="text"
+                  value={uploadForm.title}
+                  onChange={(e) => setUploadForm({ ...uploadForm, title: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    fontSize: '16px'
+                  }}
+                  required
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Description</label>
+                <textarea
+                  value={uploadForm.description}
+                  onChange={(e) => setUploadForm({ ...uploadForm, description: e.target.value })}
+                  rows={3}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    resize: 'vertical'
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Category</label>
+                <select
+                  value={uploadForm.category}
+                  onChange={(e) => setUploadForm({ ...uploadForm, category: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    fontSize: '16px'
+                  }}
+                >
+                  <option value="">Select Category</option>
+                  {Array.isArray(categories) && categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>PDF File *</label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) => setUploadForm({ ...uploadForm, pdf_file: e.target.files[0] })}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '2px dashed #e2e8f0',
+                    borderRadius: '8px',
+                    fontSize: '16px'
+                  }}
+                />
+                {uploadForm.pdf_file && (
+                  <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#10b981', fontWeight: '600' }}>
+                    ✅ Selected: {uploadForm.pdf_file.name}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px' }}>
+              <button
+                onClick={() => setShowBulkUpload(false)}
+                style={{
+                  padding: '12px 24px',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  background: 'white',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleFileUpload}
+                disabled={uploading || !uploadForm.title || !uploadForm.pdf_file}
+                style={{
+                  padding: '12px 24px',
+                  background: (uploading || !uploadForm.title || !uploadForm.pdf_file) ? '#94a3b8' : '#3b82f6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: (uploading || !uploadForm.title || !uploadForm.pdf_file) ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {uploading ? '⏳ Uploading...' : '📤 Upload & Process'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Add CSS for spinner animation */}
       <style jsx>{`
