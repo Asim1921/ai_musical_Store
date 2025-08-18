@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 
-const API_BASE = 'http://localhost:8000/api/social';
+const API_BASE = 'http://92.205.59.242/api/social';
 
 const postApi = {
   createPost: async (postData) => {

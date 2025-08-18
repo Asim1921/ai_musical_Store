@@ -9,7 +9,7 @@ import ChatInterface from './Chat';
 import { Link } from 'react-router-dom';
 
 // API configuration
-const API_BASE = 'http://localhost:8000/api/social';
+const API_BASE = 'http://92.205.59.242/api/social';
 
 // Content Card Component
 const ContentCard = ({ content }) => {
@@ -28,11 +28,11 @@ const ContentCard = ({ content }) => {
       
       let audioUrl;
       if (audioFile.startsWith('/media/')) {
-        audioUrl = `http://localhost:8000${audioFile}`;
+        audioUrl = `http://92.205.59.242${audioFile}`;
       } else if (audioFile.startsWith('media/')) {
-        audioUrl = `http://localhost:8000/${audioFile}`;
+        audioUrl = `http://92.205.59.242/${audioFile}`;
       } else {
-        audioUrl = `http://localhost:8000/media/${audioFile}`;
+        audioUrl = `http://92.205.59.242/media/${audioFile}`;
       }
       
       const audio = new Audio(audioUrl);
@@ -268,7 +268,7 @@ const api = {
       console.log('Fetching content with token:', token ? 'Token exists' : 'No token');
       
       // First, test the content endpoint
-      const testResponse = await fetch(`http://localhost:8000/api/content/test/`, {
+      const testResponse = await fetch(`http://92.205.59.242/api/content/test/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -280,7 +280,7 @@ const api = {
         console.log('Test endpoint response:', testData);
       }
       
-      const response = await fetch(`http://localhost:8000/api/content/`, {
+      const response = await fetch(`http://92.205.59.242/api/content/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -523,7 +523,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
   const fetchCategories = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`http://localhost:8000/api/content/categories/`, {
+      const response = await fetch(`http://92.205.59.242/api/content/categories/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -555,7 +555,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
       formData.append('category', uploadForm.category);
       formData.append('pdf_file', uploadForm.pdf_file);
 
-      const response = await fetch(`http://localhost:8000/api/content/creator/bulk-upload/`, {
+      const response = await fetch(`http://92.205.59.242/api/content/creator/bulk-upload/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

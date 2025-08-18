@@ -6,7 +6,7 @@ import PostCard from './PostCard';
 import MessageButton from './MessageButton';
 import ChatInterface from './Chat';  // Add this import
 
-const API_BASE = 'http://localhost:8000/api/social';
+const API_BASE = 'http://92.205.59.242/api/social';
 
 const profileApi = {
   getUserProfile: async (username = null) => {

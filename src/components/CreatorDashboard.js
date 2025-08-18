@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-const API_BASE = 'http://localhost:8000/api/content';
+const API_BASE = 'http://92.205.59.242/api/content';
 
 const CreatorDashboard = () => {
   const navigate = useNavigate();
@@ -193,11 +193,11 @@ const CreatorDashboard = () => {
       
       let audioUrl;
       if (audioFile.startsWith('/media/')) {
-        audioUrl = `http://localhost:8000${audioFile}`;
+        audioUrl = `http://92.205.59.242${audioFile}`;
       } else if (audioFile.startsWith('media/')) {
-        audioUrl = `http://localhost:8000/${audioFile}`;
+        audioUrl = `http://92.205.59.242/${audioFile}`;
       } else {
-        audioUrl = `http://localhost:8000/media/${audioFile}`;
+        audioUrl = `http://92.205.59.242/media/${audioFile}`;
       }
       
       const audio = new Audio(audioUrl);
