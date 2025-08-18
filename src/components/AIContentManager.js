@@ -43,7 +43,7 @@ import {
 } from '@mui/icons-material';
 import toast from 'react-hot-toast';
 
-const API_BASE = 'http://92.205.59.242/api/content';
+const API_BASE = ' https://nymia.me/api/content';
 
 const api = {
   getContent: async () => {

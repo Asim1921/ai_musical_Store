@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-const API_BASE = 'http://92.205.59.242/api/content';
+const API_BASE = ' https://nymia.me/api/content';
 
 const CreatorDashboard = () => {
   const navigate = useNavigate();
@@ -193,11 +193,11 @@ const CreatorDashboard = () => {
       
       let audioUrl;
       if (audioFile.startsWith('/media/')) {
-        audioUrl = `http://92.205.59.242${audioFile}`;
+        audioUrl = ` https://nymia.me${audioFile}`;
       } else if (audioFile.startsWith('media/')) {
-        audioUrl = `http://92.205.59.242/${audioFile}`;
+        audioUrl = ` https://nymia.me/${audioFile}`;
       } else {
-        audioUrl = `http://92.205.59.242/media/${audioFile}`;
+        audioUrl = ` https://nymia.me/media/${audioFile}`;
       }
       
       const audio = new Audio(audioUrl);

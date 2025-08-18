@@ -70,7 +70,7 @@ function App() {
 
         // Test if the token is still valid by making a request
         console.log('🔐 Testing token validity...');
-        const response = await fetch('http://92.205.59.242/api/social/profile/', {
+        const response = await fetch(' https://nymia.me/api/social/profile/', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',

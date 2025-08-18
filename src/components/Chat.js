@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 
-const API_BASE = 'http://92.205.59.242/api/social';
+const API_BASE = ' https://nymia.me/api/social';
 
 // Chat API functions
 const chatApi = {

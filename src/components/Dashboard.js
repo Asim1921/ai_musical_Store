@@ -9,7 +9,7 @@ import ChatInterface from './Chat';
 import { Link } from 'react-router-dom';
 
 // API configuration
-const API_BASE = 'http://92.205.59.242/api/social';
+const API_BASE = ' https://nymia.me/api/social';
 
 // Content Card Component
 const ContentCard = ({ content }) => {
@@ -28,11 +28,11 @@ const ContentCard = ({ content }) => {
       
       let audioUrl;
       if (audioFile.startsWith('/media/')) {
-        audioUrl = `http://92.205.59.242${audioFile}`;
+        audioUrl = ` https://nymia.me${audioFile}`;
       } else if (audioFile.startsWith('media/')) {
-        audioUrl = `http://92.205.59.242/${audioFile}`;
+        audioUrl = ` https://nymia.me/${audioFile}`;
       } else {
-        audioUrl = `http://92.205.59.242/media/${audioFile}`;
+        audioUrl = ` https://nymia.me/media/${audioFile}`;
       }
       
       const audio = new Audio(audioUrl);
@@ -268,7 +268,7 @@ const api = {
       console.log('Fetching content with token:', token ? 'Token exists' : 'No token');
       
       // First, test the content endpoint
-      const testResponse = await fetch(`http://92.205.59.242/api/content/test/`, {
+      const testResponse = await fetch(` https://nymia.me/api/content/test/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -280,7 +280,7 @@ const api = {
         console.log('Test endpoint response:', testData);
       }
       
-      const response = await fetch(`http://92.205.59.242/api/content/`, {
+      const response = await fetch(` https://nymia.me/api/content/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -523,7 +523,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
   const fetchCategories = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`http://92.205.59.242/api/content/categories/`, {
+      const response = await fetch(` https://nymia.me/api/content/categories/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -555,7 +555,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
       formData.append('category', uploadForm.category);
       formData.append('pdf_file', uploadForm.pdf_file);
 
-      const response = await fetch(`http://92.205.59.242/api/content/creator/bulk-upload/`, {
+      const response = await fetch(` https://nymia.me/api/content/creator/bulk-upload/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
