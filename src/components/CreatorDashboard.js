@@ -184,6 +184,12 @@ const CreatorDashboard = () => {
 
   const playAudio = async (contentId, audioFile) => {
     try {
+      // Check if audio file exists
+      if (!audioFile) {
+        toast.error('No audio file available for this content');
+        return;
+      }
+
       setAudioLoading(prev => ({ ...prev, [contentId]: true }));
       
       if (audioPlayer) {
@@ -198,6 +204,14 @@ const CreatorDashboard = () => {
         audioUrl = ` https://nymia.me/${audioFile}`;
       } else {
         audioUrl = ` https://nymia.me/media/${audioFile}`;
+      }
+      
+      // Check if audio file exists before creating Audio object
+      const checkResponse = await fetch(audioUrl, { method: 'HEAD' });
+      if (!checkResponse.ok) {
+        toast.error('Audio file not found. Please generate audio first.');
+        setAudioLoading(prev => ({ ...prev, [contentId]: false }));
+        return;
       }
       
       const audio = new Audio(audioUrl);
@@ -220,7 +234,7 @@ const CreatorDashboard = () => {
       
       audio.addEventListener('error', (e) => {
         console.error('Audio error:', e);
-        toast.error('Error playing audio');
+        toast.error('Audio file format not supported or file is corrupted');
         setAudioLoading(prev => ({ ...prev, [contentId]: false }));
       });
       
@@ -229,7 +243,7 @@ const CreatorDashboard = () => {
       
     } catch (error) {
       console.error('Error playing audio:', error);
-      toast.error('Error playing audio');
+      toast.error('Error playing audio. Please try again.');
       setAudioLoading(prev => ({ ...prev, [contentId]: false }));
     }
   };
