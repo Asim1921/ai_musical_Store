@@ -35,7 +35,7 @@ const Register = ({ setIsAuthenticated }) => {
     }
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/auth/register/', formData);
+      const response = await axios.post('https://nymia.me/api/auth/register/', formData);
       
       toast.success('Registration successful! Please check your email to verify your account.');
       

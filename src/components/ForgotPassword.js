@@ -26,7 +26,7 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      await axios.post('http://127.0.0.1:8000/api/auth/password-reset/', {
+      await axios.post('https://nymia.me/api/auth/password-reset/', {
         email: formData.email
       });
       
@@ -50,7 +50,7 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      await axios.post('http://127.0.0.1:8000/api/auth/password-reset-confirm/', {
+      await axios.post('https://nymia.me/api/auth/password-reset-confirm/', {
         email: formData.email,
         otp: formData.otp,
         new_password: formData.new_password,

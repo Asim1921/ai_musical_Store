@@ -7,7 +7,7 @@ const GoogleAuthButton = ({ setIsAuthenticated, onSuccess }) => {
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/auth/google-auth/', {
+      const response = await axios.post('https://nymia.me/api/auth/google-auth/', {
         access_token: credentialResponse.credential
       });
 

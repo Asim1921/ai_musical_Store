@@ -28,7 +28,7 @@ const Login = ({ setIsAuthenticated }) => {
   console.log('Form data:', formData);
 
   try {
-    const response = await axios.post('http://127.0.0.1:8000/api/auth/login/', formData);
+    const response = await axios.post('https://nymia.me/api/auth/login/', formData);
     
     // Store tokens
     localStorage.setItem('access_token', response.data.tokens.access);
