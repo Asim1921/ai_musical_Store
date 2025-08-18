@@ -280,7 +280,7 @@ const api = {
         console.log('Test endpoint response:', testData);
       }
       
-      const response = await fetch(` https://nymia.me/api/content/`, {
+      const response = await fetch(` https://nymia.me/api/content/content/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
