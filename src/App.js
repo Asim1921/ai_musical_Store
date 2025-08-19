@@ -14,6 +14,7 @@ import Dashboard from './components/Dashboard';
 import ProfilePage from './components/ProfilePage';
 import CreatorDashboard from './components/CreatorDashboard';
 import './App.css';
+import { API_ENDPOINTS } from './config';
 
 // Google OAuth Client ID
 const GOOGLE_CLIENT_ID = "28222189286-ru4almtujkm68ligt44nu45b2r7u8cqi.apps.googleusercontent.com";
@@ -70,7 +71,7 @@ function App() {
 
         // Test if the token is still valid by making a request
         console.log('🔐 Testing token validity...');
-        const response = await fetch('http://localhost:8000/api/social/profile/', {
+        const response = await fetch(`${API_ENDPOINTS.SOCIAL}/profile/`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',

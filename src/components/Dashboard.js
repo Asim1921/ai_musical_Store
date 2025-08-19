@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { API_ENDPOINTS, getMediaUrl } from '../config';
 import PostCard from './PostCard';
 import SearchModal from './Search';
 import CreatePostModal from './CreatePostModal';
@@ -9,7 +10,7 @@ import ChatInterface from './Chat';
 import { Link } from 'react-router-dom';
 
 // API configuration
-const API_BASE = 'http://localhost:8000/api/social';
+const API_BASE = API_ENDPOINTS.SOCIAL;
 
 // Content Card Component
 const ContentCard = ({ content, onLike, onComment }) => {
@@ -28,14 +29,7 @@ const ContentCard = ({ content, onLike, onComment }) => {
         audioPlayer.currentTime = 0;
       }
       
-      let audioUrl;
-      if (audioFile.startsWith('/media/')) {
-        audioUrl = `http://localhost:8000${audioFile}`;
-      } else if (audioFile.startsWith('media/')) {
-        audioUrl = `http://localhost:8000/${audioFile}`;
-      } else {
-        audioUrl = `http://localhost:8000/media/${audioFile}`;
-      }
+      let audioUrl = getMediaUrl(audioFile);
       
       const audio = new Audio(audioUrl);
       
@@ -369,7 +363,7 @@ const api = {
       console.log('Fetching content with token:', token ? 'Token exists' : 'No token');
       
       // First, test the content endpoint
-      const testResponse = await fetch(`http://localhost:8000/api/content/test/`, {
+      const testResponse = await fetch(`${API_ENDPOINTS.CONTENT}/test/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -381,7 +375,7 @@ const api = {
         console.log('Test endpoint response:', testData);
       }
       
-      const response = await fetch(`http://localhost:8000/api/content/content/`, {
+      const response = await fetch(`${API_ENDPOINTS.CONTENT}/content/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -616,7 +610,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
   const handleContentLike = async (contentId) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`http://localhost:8000/api/content/content/${contentId}/like/`, {
+      const response = await fetch(`${API_ENDPOINTS.CONTENT}/content/${contentId}/like/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -650,7 +644,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
   const handleContentComment = async (contentId, commentText) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`http://localhost:8000/api/content/content/${contentId}/comment/`, {
+      const response = await fetch(`${API_ENDPOINTS.CONTENT}/content/${contentId}/comment/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -681,7 +675,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
   const fetchCategories = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`http://localhost:8000/api/content/categories/`, {
+      const response = await fetch(`${API_ENDPOINTS.CONTENT}/categories/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -713,7 +707,7 @@ const Dashboard = ({ setIsAuthenticated }) => {
       formData.append('category', uploadForm.category);
       formData.append('pdf_file', uploadForm.pdf_file);
 
-      const response = await fetch(`http://localhost:8000/api/content/creator/bulk-upload/`, {
+      const response = await fetch(`${API_ENDPOINTS.CONTENT}/creator/bulk-upload/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

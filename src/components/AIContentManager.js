@@ -42,8 +42,9 @@ import {
   Psychology
 } from '@mui/icons-material';
 import toast from 'react-hot-toast';
+import { API_ENDPOINTS } from '../config';
 
-const API_BASE = 'http://localhost:8000/api/content';
+const API_BASE = API_ENDPOINTS.CONTENT;
 
 const api = {
   getContent: async () => {

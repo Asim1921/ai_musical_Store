@@ -2,11 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { API_ENDPOINTS } from '../config';
 import PostCard from './PostCard';
 import MessageButton from './MessageButton';
 import ChatInterface from './Chat';  // Add this import
 
-const API_BASE = 'http://localhost:8000/api/social';
+const API_BASE = API_ENDPOINTS.SOCIAL;
 
 const profileApi = {
   getUserProfile: async (username = null) => {

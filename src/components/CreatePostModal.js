@@ -1,8 +1,9 @@
 // src/components/CreatePostModal.js
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
+import { API_ENDPOINTS } from '../config';
 
-const API_BASE = 'http://localhost:8000/api/social';
+const API_BASE = API_ENDPOINTS.SOCIAL;
 
 const postApi = {
   createPost: async (postData) => {
