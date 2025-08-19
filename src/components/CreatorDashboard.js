@@ -26,6 +26,9 @@ const CreatorDashboard = () => {
   const [audioPlayer, setAudioPlayer] = useState(null);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const [audioLoading, setAudioLoading] = useState({});
+  const [likedContent, setLikedContent] = useState(new Set());
+  const [commentTexts, setCommentTexts] = useState({});
+  const [showComments, setShowComments] = useState({});
 
   useEffect(() => {
     fetchDashboardData();
@@ -249,6 +252,75 @@ const CreatorDashboard = () => {
     }
   };
 
+  const likeContent = async (contentId) => {
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`${API_BASE}/content/${contentId}/like/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setLikedContent(prev => {
+          const newSet = new Set(prev);
+          if (data.liked) {
+            newSet.add(contentId);
+          } else {
+            newSet.delete(contentId);
+          }
+          return newSet;
+        });
+        
+        // Update dashboard data
+        fetchDashboardData();
+        toast.success(data.liked ? 'Content liked!' : 'Content unliked');
+      } else {
+        toast.error('Failed to like content');
+      }
+    } catch (error) {
+      console.error('Error liking content:', error);
+      toast.error('Error liking content');
+    }
+  };
+
+  const commentContent = async (contentId) => {
+    const commentText = commentTexts[contentId]?.trim();
+    if (!commentText) {
+      toast.error('Please enter a comment');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`${API_BASE}/content/${contentId}/comment/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ comment: commentText })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setCommentTexts(prev => ({ ...prev, [contentId]: '' }));
+        toast.success('Comment added successfully!');
+        
+        // Update dashboard data
+        fetchDashboardData();
+      } else {
+        toast.error('Failed to add comment');
+      }
+    } catch (error) {
+      console.error('Error commenting on content:', error);
+      toast.error('Error adding comment');
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'completed': return '#10b981';
@@ -419,7 +491,9 @@ const CreatorDashboard = () => {
                 <h3 style={{ margin: 0, fontSize: '32px', fontWeight: '700', color: '#1e293b' }}>
                   {dashboardData.followers_count || 0}
                 </h3>
-                <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#10b981' }}>+12% this month</p>
+                <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#10b981' }}>
+                  +{dashboardData.follower_growth?.this_month || 0} this month
+                </p>
               </div>
               <div style={{ fontSize: '48px', opacity: 0.6 }}>👥</div>
             </div>
@@ -438,7 +512,9 @@ const CreatorDashboard = () => {
                 <h3 style={{ margin: 0, fontSize: '32px', fontWeight: '700', color: '#1e293b' }}>
                   {dashboardData.content_performance?.total_views || 0}
                 </h3>
-                <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#10b981' }}>+8% this week</p>
+                <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#10b981' }}>
+                  +{dashboardData.content_performance?.week_growth_percentage || 0}% this week
+                </p>
               </div>
               <div style={{ fontSize: '48px', opacity: 0.6 }}>👁️</div>
             </div>
@@ -457,7 +533,9 @@ const CreatorDashboard = () => {
                 <h3 style={{ margin: 0, fontSize: '32px', fontWeight: '700', color: '#1e293b' }}>
                   {dashboardData.content_performance?.total_likes || 0}
                 </h3>
-                <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#10b981' }}>+15% this month</p>
+                <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#10b981' }}>
+                  +{dashboardData.content_performance?.month_growth_percentage || 0}% this month
+                </p>
               </div>
               <div style={{ fontSize: '48px', opacity: 0.6 }}>❤️</div>
             </div>
@@ -476,7 +554,9 @@ const CreatorDashboard = () => {
                 <h3 style={{ margin: 0, fontSize: '32px', fontWeight: '700', color: '#1e293b' }}>
                   {dashboardData.content_performance?.average_engagement_rate || 0}%
                 </h3>
-                <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#10b981' }}>+5% this week</p>
+                <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#10b981' }}>
+                  +{dashboardData.content_performance?.week_growth_percentage || 0}% this week
+                </p>
               </div>
               <div style={{ fontSize: '48px', opacity: 0.6 }}>📈</div>
             </div>
@@ -538,7 +618,8 @@ const CreatorDashboard = () => {
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                  gap: '24px'
+                  gap: '24px',
+                  marginBottom: '32px'
                 }}>
                   <div style={{
                     background: '#f8fafc',
@@ -585,6 +666,207 @@ const CreatorDashboard = () => {
                         </div>
                       ))}
                     </div>
+                  </div>
+                </div>
+
+                {/* Recent Content with Like/Comment */}
+                <div style={{ marginTop: '32px' }}>
+                  <h4 style={{ margin: '0 0 20px 0', fontSize: '18px', fontWeight: '600' }}>
+                    Recent Content
+                  </h4>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+                    gap: '24px'
+                  }}>
+                    {dashboardData.recent_content?.map((content) => (
+                      <div key={content.id} style={{
+                        background: 'white',
+                        borderRadius: '12px',
+                        padding: '20px',
+                        border: '1px solid #e2e8f0',
+                        transition: 'transform 0.2s, box-shadow 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.transform = 'translateY(-2px)';
+                        e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = 'none';
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                          <h4 style={{ margin: 0, fontSize: '18px', fontWeight: '600', flex: 1 }}>
+                            {content.title}
+                          </h4>
+                        </div>
+                        
+                        <p style={{
+                          margin: '0 0 16px 0',
+                          fontSize: '14px',
+                          color: '#64748b',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden'
+                        }}>
+                          {content.description}
+                        </p>
+
+                        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
+                          <span style={{
+                            padding: '4px 8px',
+                            background: '#f1f5f9',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            color: '#475569'
+                          }}>
+                            👁️ {content.views_count} views
+                          </span>
+                          <span style={{
+                            padding: '4px 8px',
+                            background: '#f1f5f9',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            color: '#475569'
+                          }}>
+                            ❤️ {content.likes_count} likes
+                          </span>
+                          {content.audio_file && (
+                            <span style={{
+                              padding: '4px 8px',
+                              background: '#dcfce7',
+                              borderRadius: '6px',
+                              fontSize: '12px',
+                              color: '#166534'
+                            }}>
+                              🔊 Audio
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Audio Player */}
+                        {content.audio_file && (
+                          <div style={{
+                            background: '#f8fafc',
+                            borderRadius: '12px',
+                            padding: '16px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            marginBottom: '16px'
+                          }}>
+                            <button
+                              onClick={() => {
+                                if (currentlyPlaying === content.id) {
+                                  pauseAudio();
+                                } else {
+                                  playAudio(content.id, content.audio_file);
+                                }
+                              }}
+                              style={{
+                                width: '48px',
+                                height: '48px',
+                                borderRadius: '50%',
+                                background: currentlyPlaying === content.id ? '#ef4444' : '#3b82f6',
+                                color: 'white',
+                                border: 'none',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '18px'
+                              }}
+                            >
+                              {audioLoading[content.id] ? '⏳' : currentlyPlaying === content.id ? '⏸️' : '▶️'}
+                            </button>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '4px' }}>
+                                {content.title}
+                              </div>
+                              <div style={{ fontSize: '12px', color: '#64748b' }}>
+                                {audioLoading[content.id] ? 'Loading...' : currentlyPlaying === content.id ? 'Now Playing' : 'Click to play'}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Like and Comment Actions */}
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button
+                              onClick={() => likeContent(content.id)}
+                              style={{
+                                padding: '8px 16px',
+                                background: likedContent.has(content.id) ? '#ef4444' : '#f1f5f9',
+                                color: likedContent.has(content.id) ? 'white' : '#475569',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                            >
+                              {likedContent.has(content.id) ? '❤️' : '🤍'} 
+                              {likedContent.has(content.id) ? 'Liked' : 'Like'}
+                            </button>
+                            <button
+                              onClick={() => setShowComments(prev => ({ ...prev, [content.id]: !prev[content.id] }))}
+                              style={{
+                                padding: '8px 16px',
+                                background: '#f1f5f9',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                            >
+                              💬 Comment
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Comment Section */}
+                        {showComments[content.id] && (
+                          <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e2e8f0' }}>
+                            <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                              <input
+                                type="text"
+                                placeholder="Write a comment..."
+                                value={commentTexts[content.id] || ''}
+                                onChange={(e) => setCommentTexts(prev => ({ ...prev, [content.id]: e.target.value }))}
+                                style={{
+                                  flex: 1,
+                                  padding: '8px 12px',
+                                  border: '1px solid #e2e8f0',
+                                  borderRadius: '6px',
+                                  fontSize: '14px'
+                                }}
+                              />
+                              <button
+                                onClick={() => commentContent(content.id)}
+                                style={{
+                                  padding: '8px 16px',
+                                  background: '#3b82f6',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  fontSize: '14px'
+                                }}
+                              >
+                                Post
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -774,11 +1056,86 @@ const CreatorDashboard = () => {
                               fontSize: '14px'
                             }}
                           >
-                            {audioLoading[content.id] ? '⏳ Loading...' :
+                            {audioLoading[content.id] ? '⏳ Loading...' : 
                              currentlyPlaying === content.id ? '⏸️ Pause' : '▶️ Play Audio'}
                           </button>
                         )}
                       </div>
+
+                      {/* Like and Comment Actions */}
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '12px', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button
+                            onClick={() => likeContent(content.id)}
+                            style={{
+                              padding: '6px 12px',
+                              background: likedContent.has(content.id) ? '#ef4444' : '#f1f5f9',
+                              color: likedContent.has(content.id) ? 'white' : '#475569',
+                              border: '1px solid #e2e8f0',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontSize: '12px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            {likedContent.has(content.id) ? '❤️' : '🤍'} 
+                            {likedContent.has(content.id) ? 'Liked' : 'Like'}
+                          </button>
+                          <button
+                            onClick={() => setShowComments(prev => ({ ...prev, [content.id]: !prev[content.id] }))}
+                            style={{
+                              padding: '6px 12px',
+                              background: '#f1f5f9',
+                              border: '1px solid #e2e8f0',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontSize: '12px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            💬 Comment
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Comment Section */}
+                      {showComments[content.id] && (
+                        <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e2e8f0' }}>
+                          <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                            <input
+                              type="text"
+                              placeholder="Write a comment..."
+                              value={commentTexts[content.id] || ''}
+                              onChange={(e) => setCommentTexts(prev => ({ ...prev, [content.id]: e.target.value }))}
+                              style={{
+                                flex: 1,
+                                padding: '6px 10px',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '6px',
+                                fontSize: '12px'
+                              }}
+                            />
+                            <button
+                              onClick={() => commentContent(content.id)}
+                              style={{
+                                padding: '6px 12px',
+                                background: '#3b82f6',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                fontSize: '12px'
+                              }}
+                            >
+                              Post
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

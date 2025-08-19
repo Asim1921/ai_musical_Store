@@ -12,10 +12,12 @@ import { Link } from 'react-router-dom';
 const API_BASE = 'http://localhost:8000/api/social';
 
 // Content Card Component
-const ContentCard = ({ content }) => {
+const ContentCard = ({ content, onLike, onComment }) => {
   const [audioPlayer, setAudioPlayer] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioLoading, setAudioLoading] = useState(false);
+  const [commentText, setCommentText] = useState('');
+  const [showCommentInput, setShowCommentInput] = useState(false);
 
   const playAudio = async (audioFile) => {
     try {
@@ -76,6 +78,24 @@ const ContentCard = ({ content }) => {
     }
   };
 
+  const handleLike = () => {
+    if (onLike) {
+      onLike(content.id);
+    }
+  };
+
+  const handleComment = () => {
+    if (commentText.trim()) {
+      if (onComment) {
+        onComment(content.id, commentText);
+        setCommentText('');
+        setShowCommentInput(false);
+      }
+    } else {
+      toast.error('Please enter a comment');
+    }
+  };
+
   return (
     <div style={{
       background: 'white',
@@ -111,17 +131,88 @@ const ContentCard = ({ content }) => {
           </p>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <span style={{
-            padding: '4px 8px',
-            background: '#f1f5f9',
+          <button 
+            onClick={handleLike}
+            style={{
+              padding: '6px 12px',
+              background: content.is_liked ? '#ef4444' : 'transparent',
+              color: content.is_liked ? 'white' : '#475569',
+              border: '1px solid #e2e8f0',
             borderRadius: '6px',
-            fontSize: '12px',
-            color: '#475569'
+              cursor: 'pointer',
+              fontSize: '14px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+          >
+            {content.is_liked ? '❤️' : '🤍'} {content.is_liked ? 'Liked' : 'Like'}
+          </button>
+          <button 
+            onClick={() => setShowCommentInput(!showCommentInput)}
+            style={{
+              padding: '6px 12px',
+              background: 'transparent',
+              border: '1px solid #e2e8f0',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
+          >
+            💬 Comment
+          </button>
+          <button style={{
+            padding: '6px 12px',
+            background: 'transparent',
+            border: '1px solid #e2e8f0',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '14px'
           }}>
-            🎵 Audio Content
-          </span>
+            📤 Share
+          </button>
         </div>
       </div>
+
+      {/* Comment Input */}
+      {showCommentInput && (
+        <div style={{
+          marginTop: '16px',
+          paddingTop: '16px',
+          borderTop: '1px solid #f1f5f9'
+        }}>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <input
+              type="text"
+              placeholder="Write a comment..."
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleComment()}
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                border: '1px solid #e2e8f0',
+                borderRadius: '6px',
+                fontSize: '14px'
+              }}
+            />
+            <button
+              onClick={handleComment}
+              style={{
+                padding: '8px 16px',
+                background: '#3b82f6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}
+            >
+              Post
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Content */}
       <div style={{ marginBottom: '16px' }}>
@@ -206,24 +297,34 @@ const ContentCard = ({ content }) => {
           )}
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button style={{
-            padding: '6px 12px',
-            background: 'transparent',
-            border: '1px solid #e2e8f0',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}>
-            ❤️ Like
+          <button 
+            onClick={handleLike}
+            style={{
+              padding: '6px 12px',
+              background: content.is_liked ? '#ef4444' : 'transparent',
+              color: content.is_liked ? 'white' : '#475569',
+              border: '1px solid #e2e8f0',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+          >
+            {content.is_liked ? '❤️' : '🤍'} {content.is_liked ? 'Liked' : 'Like'}
           </button>
-          <button style={{
-            padding: '6px 12px',
-            background: 'transparent',
-            border: '1px solid #e2e8f0',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}>
+          <button 
+            onClick={() => setShowCommentInput(!showCommentInput)}
+            style={{
+              padding: '6px 12px',
+              background: 'transparent',
+              border: '1px solid #e2e8f0',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
+          >
             💬 Comment
           </button>
           <button style={{
@@ -280,7 +381,7 @@ const api = {
         console.log('Test endpoint response:', testData);
       }
       
-      const response = await fetch(`http://localhost:8000/api/content/`, {
+      const response = await fetch(`http://localhost:8000/api/content/content/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -510,6 +611,63 @@ const Dashboard = ({ setIsAuthenticated }) => {
           : post
       )
     );
+  };
+
+  const handleContentLike = async (contentId) => {
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`http://localhost:8000/api/content/content/${contentId}/like/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setContent(prevContent => 
+          prevContent.map(item => 
+            item.id === contentId 
+              ? { 
+                  ...item, 
+                  is_liked: data.liked,
+                  likes_count: data.likes_count 
+                }
+              : item
+          )
+        );
+        toast.success(data.liked ? 'Content liked!' : 'Content unliked');
+      } else {
+        toast.error('Failed to like content');
+      }
+    } catch (error) {
+      console.error('Error liking content:', error);
+      toast.error('Error liking content');
+    }
+  };
+
+  const handleContentComment = async (contentId, commentText) => {
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`http://localhost:8000/api/content/content/${contentId}/comment/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ comment: commentText })
+      });
+      
+      if (response.ok) {
+        toast.success('Comment added successfully!');
+      } else {
+        toast.error('Failed to add comment');
+      }
+    } catch (error) {
+      console.error('Error commenting on content:', error);
+      toast.error('Error adding comment');
+    }
   };
 
   const handleLogout = () => {
@@ -921,6 +1079,8 @@ const Dashboard = ({ setIsAuthenticated }) => {
                       <ContentCard 
                         key={item.id} 
                         content={item}
+                        onLike={handleContentLike}
+                        onComment={handleContentComment}
                       />
                     ))}
                   </div>
